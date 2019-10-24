@@ -1,0 +1,10 @@
+﻿@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Reflection.Serialization.Extensions;
+
+@model MetaObject
+
+@{
+    Layout = null;
+}
+
+<input name="@Model.Property.Name" type="number" value="@(Model.GetValue<float>())" max="@float.MaxValue" min="@float.MinValue" step="any" placeholder="float" />

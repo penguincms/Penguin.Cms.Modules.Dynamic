@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <Nullable>enable</Nullable>
+    <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="3.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Penguin.Cms.Entities" Version="3.0.3" />
+    <PackageReference Include="Penguin.Cms.Errors" Version="1.0.0" />
+    <PackageReference Include="Penguin.Cms.Repositories" Version="3.0.3" />
+    <PackageReference Include="Penguin.Cms.Web" Version="1.0.0" />
+    <PackageReference Include="Penguin.Persistence.Abstractions" Version="3.0.1" />
+    <PackageReference Include="Penguin.Reflection.Serialization" Version="3.0.6" />
+    <PackageReference Include="Penguin.Reflection.Serialization.Abstractions" Version="3.0.0" />
+    <PackageReference Include="Penguin.Security.Abstractions" Version="2.0.0" />
+    <PackageReference Include="Penguin.Shared.Objects" Version="2.0.1" />
+    <PackageReference Include="Penguin.Web.Dynamic" Version="1.0.0" />
+    <PackageReference Include="Penguin.Web.Security" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Penguin.Cms.Modules.Admin\Penguin.Cms.Modules.Admin.csproj" />
+  </ItemGroup>
+
+
+</Project>

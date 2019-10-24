@@ -1,0 +1,173 @@
+﻿@import "Metaform.Grid.css"; /* Using a string */
+@import "Metaform.Table.css"; /* Using a string */
+@import "Metaform.Column.css"; /* Using a string */
+
+input, textarea, select {
+    border: 1px solid #a0a0a0;
+}
+
+property[data-collectiontype="System.String"] .valuesList i {
+    color: #000000;
+}
+
+property[data-collectiontype="System.String"] .listValue {
+    width: 100%
+}
+
+textarea {
+    width: 100%;
+    min-height: 300px;
+}
+
+input[type="number"] {
+    text-align: right;
+}
+
+input#showDisabled:checked ~ property [data-ignore="hidden"] {
+    display: inherit;
+}
+
+input#showDisabled ~ property [data-hidden="True"] {
+    display: none;
+}
+
+[data-hidden="True"] {
+    display: none;
+}
+
+.selectorValues > property[data-coretype="Value"] {
+    border: none;
+    margin-bottom: 0;
+}
+
+property name {
+    width: 100%;
+    background-color: #2196F3;
+    color: white;
+    padding: 0px 15px;
+    display: inline-block;
+    box-sizing: border-box;
+    border: 1px solid #cdcdcd;
+}
+
+property value {
+    width: 100%;
+    display: inline-block;
+    padding: 5px 15px;
+    box-sizing: border-box;
+    border: 1px solid #cdcdcd;
+}
+
+property {
+    width: 100%;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+    property value input, property value select {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    property[data-isroot="True"] {
+        border: none;
+    }
+
+value.listValue {
+    width: inherit;
+    max-width: 100%;
+    padding: 0px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.deleteContainer {
+    display: inline-block;
+    position: absolute;
+    right: 0;
+    top: 10px;
+}
+
+    .deleteContainer i {
+        color: white;
+        z-index: 999;
+    }
+
+    .deleteContainer a {
+        text-decoration: none;
+    }
+
+property value property {
+    width: inherit;
+    display: block;
+    position: relative;
+}
+
+.listValue value {
+    width: inherit;
+    display: block;
+}
+
+.listValue property name {
+    display: block;
+}
+
+.valuesList > value > property > name {
+    color: transparent;
+}
+
+.addContainer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 46px;
+    z-index: 999;
+}
+
+    .addContainer i {
+        color: white;
+    }
+
+.slideToggle {
+    height: 100%;
+    position: absolute;
+    right: 0;
+    width: 20px;
+}
+
+input.toggleProperty {
+    flex-grow: 0;
+    flex-basis: auto;
+    width: 24px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+span.propertyName {
+    flex-grow: 1;
+    flex-basis: auto;
+    vertical-align: middle;
+    line-height: 45px;
+}
+
+property[data-disabled="True"] > name {
+    background-color: #cdcdcd;
+}
+
+[data-isbatch="True"] > value {
+    display: none;
+}
+
+.deleteContainer:hover ~ property input {
+    border: 1px solid red !important;
+    color: red;
+}
+
+#showDisabled:checked ~ property [data-hidden="True"] {
+    display: inherit !important;
+}
+
+#showDisabled ~ property [data-hidden="True"] {
+    display: none !important;
+}

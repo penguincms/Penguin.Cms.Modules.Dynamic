@@ -1,0 +1,45 @@
+﻿property[data-groupname="grid"] > value {
+    display: flex;
+    padding: 0px;
+}
+
+    property[data-groupname="grid"] > value > .valuesList {
+        width: 100%;
+    }
+
+        property[data-groupname="grid"] > value > .valuesList > .listValue > property {
+            display: flex;
+            margin-bottom: 0px;
+        }
+
+        property[data-groupname="grid"] > value > .valuesList > .listValue > .deleteContainer {
+            top: 0;
+            left: 0;
+            padding: 10px;
+            width: initial;
+            right: initial;
+        }
+
+        property[data-groupname="grid"] > value > .valuesList > .listValue > property > name > span {
+            display: none;
+        }
+
+        property[data-groupname="grid"] > value > .valuesList > .listValue > property > name {
+            flex-grow: 0;
+            flex-basis: 44px;
+            width: initial;
+        }
+
+        property[data-groupname="grid"] > value > .valuesList > .listValue > property > value {
+            flex-grow: 1;
+            flex-basis: auto;
+            display: flex;
+            padding: 0px;
+        }
+
+property[data-groupname="grid"] {
+}
+
+    property[data-groupname="grid"] > value > .valuesList > .listValue > property > value > property {
+        margin-bottom: 0px;
+    }

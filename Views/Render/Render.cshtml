@@ -1,0 +1,21 @@
+﻿@model object
+
+
+@{
+    IMetaObject renderData;
+    if (Model is IMetaObject m)
+    {
+        renderData = m;
+    }
+    else
+    {
+        renderData = new MetaObjectHolder(Model);
+    }
+
+    EditorHandlerResult result = DynamicEditorService.FindHandler(renderData, DisplayContexts.View);
+
+    if (result is DynamicViewResult vr)
+    {
+        <partial name="ViewPath" model="Model" />
+    }
+}

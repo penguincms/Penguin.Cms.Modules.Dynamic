@@ -1,0 +1,113 @@
+﻿@model PagedListContainer<IMetaObject>
+
+@using Penguin.Reflection.Serialization.Extensions;
+@using Penguin.Reflection.Serialization.Abstractions.Interfaces;
+@using Newtonsoft.Json;
+
+@{
+    /**/
+
+    Guid thisSearchGuid = Guid.NewGuid();
+
+    if (!Model.PostbackParameters.Any() && Context.Request.Method == "POST" && !Context.Request.ContentType.Contains("json"))
+    {
+        string[] keys = Context.Request.Form.Keys.ToArray();
+        for (int i = 0; i < keys.Length; i++)
+        {
+            Model.PostbackParameters.Add(keys[i], Context.Request.Form[keys[i]]);
+        }
+    }
+
+    bool HasText = Model.PostbackParameters.ContainsKey("text");
+    bool DisplaySettings = Model.Count != 20 || HasText;
+}
+
+<div class="pager">
+    <span class="displayText">
+        <a href="javascript:;" onclick="$('#@thisSearchGuid').toggle();" style="text-decoration: none;">
+            @Html.MaterialIcon("settings")
+        </a>
+        Showing @Model.Start - @Model.End of @Model.TotalCount
+    </span>
+    <div class="pages">
+        <input type="hidden" value="@Model.Page" name="page" id="page" />
+        @if (Model.Page > 4 && Model.TotalPages > 9)
+        {
+        <a href="javascript:;" onclick="updatePage(0)">First</a>
+        }
+
+        @if (Model.TotalPages > 9)
+        {
+            for (int i = Math.Max(Model.Page - 5, 0); i < Math.Min(Model.Page + 5, Model.TotalPages); i++)
+            {
+                if (i == Model.Page)
+                {
+        <span class="page">@(i + 1)</span>
+                }
+                else
+                {
+        <a href="javascript:;" class="page" onclick="updatePage(@i)">@(i + 1)</a>
+                }
+
+            }
+        }
+        else
+        {
+            for (int i = 0; i < Model.TotalPages; i++)
+            {
+                if (i == Model.Page)
+                {
+        <span class="page">@(i + 1)</span>
+                }
+                else
+                {
+        <a href="javascript:;" class="page" onclick="updatePage(@i)">@(i + 1)</a>
+                }
+            }
+        }
+
+        @if (Model.Page < Model.TotalPages - 4 && Model.TotalPages > 9)
+        {
+        <a href="javascript:;" onclick="updatePage(@(Model.TotalPages - 1))">Last</a>
+        }
+    </div>
+
+    <span id="@thisSearchGuid" @Html.Attribute("style", "display: none;", !DisplaySettings) class="pagerSearch">
+        <input type="text" placeholder="Search String" id="SearchString" @Html.Raw(!HasText ? "" : $"value=\"{Model.PostbackParameters["text"]}\"") />
+        <input type="number" min="5" step="1" value="@Model.Count" id="SearchCount" />
+        <button type="button" onclick="updateSearch()">
+            Update Results
+        </button>
+        <script>
+
+            var PostBackParameters = @Html.Raw(Model.PostbackParameters.Any() ? JsonConvert.SerializeObject(Model.PostbackParameters) : "{}");
+
+            function updatePage(page) {
+                $('#page').val(page);
+                updateSearch();
+            }
+            function updateSearch() {
+
+                var uri = window.location.href;
+
+                uri = updateQueryStringParameter('text', $('#SearchString').val(), uri);
+                uri = updateQueryStringParameter('count', $('#SearchCount').val(), uri);
+                uri = updateQueryStringParameter('page', $('#page').val(), uri);
+
+                if ($.isEmptyObject(PostBackParameters)) {
+                    Site.ShowLoader();
+                    window.location.href = uri;
+                } else {
+                    PostBackParameters['count'] = $('#SearchCount').val();
+                    PostBackParameters['text'] = $('#SearchString').val();
+                    PostBackParameters['page'] = $('#page').val();
+                    Site.PostJsonAsForm(PostBackParameters, '@Context.Request.Path.Value', function (data) { $('.pager').parent().html(data); });
+                }
+            }
+        </script>
+    </span>
+</div>
+
+<div class="list">
+    <partial name="~/Areas/Admin/Views/Render/List.cshtml" model="@(new DynamicListModel<IMetaObject>(Model.Items, Model.HiddenColumns))" />
+</div>

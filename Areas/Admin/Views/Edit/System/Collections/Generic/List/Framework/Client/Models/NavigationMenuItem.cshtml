@@ -1,0 +1,13 @@
+﻿@model IMetaObject
+
+@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Reflection.Serialization.Abstractions.Interfaces;
+
+@{
+    Layout = null;
+}
+
+@foreach (string item in Model.CollectionItems.Select(o => o.Value))
+{
+<span>@item</span>
+}

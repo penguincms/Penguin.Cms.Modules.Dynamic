@@ -1,0 +1,25 @@
+﻿@model DynamicListRenderPageModel
+@using Microsoft.AspNetCore.Mvc.Razor;
+@using Microsoft.Extensions.DependencyInjection;
+
+@{
+    Layout = ServiceProvider.GetService<IRazorViewEngine>().FindView(new ActionContext(this.Context, this.Context.GetRouteData(), this.ViewContext.ActionDescriptor), "_Layout", false)?.View?.Path ?? "_Layout.cshtml";
+    Guid formGuid = Guid.NewGuid();
+    object KnownControllerV = this.Context.GetRouteData().Values["KnownController"];
+    bool KnownController = KnownControllerV != null && bool.Parse(KnownControllerV.ToString());
+}
+
+@if (!KnownController)
+{
+@section LeftPane {
+    <partial name="~/Areas/Admin/Views/Dynamic/LeftPane.cshtml" model="@Model.Type" />
+}
+}
+
+<form id="@formGuid" action="/Admin/Dynamic/UpdateList" method="post" class="DynamicList">
+    <partial name="~/Areas/Admin/Views/Render/PagedList.cshtml" model="@Model.PagedList" />
+</form>
+
+<button onclick="$('#@formGuid').submit()">
+    Update Selected
+</button>

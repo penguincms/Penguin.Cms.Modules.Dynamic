@@ -1,0 +1,154 @@
+﻿@model DynamicListModel<IMetaObject>
+
+@if (Model.List.Any())
+{
+    IEnumerable<IMetaProperty> properties = Model.List.ElementAt(0).Type.Properties;
+    object KnownControllerV = this.Context.GetRouteData().Values["KnownController"];
+    bool KnownController = KnownControllerV != null && bool.Parse(KnownControllerV.ToString());
+
+    <table>
+        <tr>
+            <th class="selectColumn">
+                <input type="checkbox" onclick="$(this).closest('table').find('.tableSelect').prop('checked', $(this).prop('checked'));" />
+            </th>
+            <th class="editColumn">
+            </th>
+            @foreach (IMetaProperty property in properties.OrderBy(p => p.AttributeStruct(typeof(DisplayAttribute), nameof(DisplayAttribute.Order), 0)))
+            {
+                DisplayContexts dontAllow = property.AttributeStruct(typeof(DontAllowAttribute), nameof(DontAllowAttribute.Context), DisplayContexts.None);
+
+                if (!(dontAllow.HasFlag(DisplayContexts.List) || dontAllow.HasFlag(DisplayContexts.View)))
+                {
+                    if (!Model.HiddenColumns.Contains(property.Name))
+                    {
+                        <th class="list_@property.Name">
+                            @property.DisplayName()
+                        </th>
+                    }
+
+                }
+            }
+        </tr>
+        @foreach (IMetaObject o in Model.List)
+        {
+            <tr>
+
+                @{
+                    IMetaProperty KeyProp = properties.FirstOrDefault(p => p.HasAttribute<KeyAttribute>()) ?? properties.FirstOrDefault(p => p.Name == "ID");
+
+                    <td class="selectColumn">
+                        @if (o.Is<Entity>())
+                        {
+                            <input type="checkbox" class="tableSelect" name="@(o[nameof(Entity.Guid)].Value)" />
+                        }
+                    </td>
+                    <td class="editColumn">
+                        @if (KeyProp != null)
+                        {
+                            object KeyVal = KeyProp.GetValue(o);
+
+                            if (KnownController)
+                            {
+                                <a href="@($"/Admin/{this.Context.GetRouteData().Values["controller"]}/Edit/{KeyVal}")">
+                                    @Html.MaterialIcon("edit")
+                                </a>
+                            }
+                            else
+                            {
+                                string TypeName = o.Type.Namespace == "System.Data.Entity.DynamicProxies" ? o.Type.BaseType.FullName : o.Type.FullName;
+                                <a href="@($"/Admin/Edit/{TypeName}/{KeyVal}")">
+                                    @Html.MaterialIcon("edit")
+                                </a>
+                            }
+                        }
+                    </td>
+                }
+
+                @foreach (IMetaProperty property in o.Type.Properties.OrderBy(p => p.AttributeStruct(typeof(DisplayAttribute), nameof(DisplayAttribute.Order), 0)))
+                {
+                    if (!Model.HiddenColumns.Contains(property.Name))
+                    {
+                        DisplayContexts dontAllow = property.AttributeStruct(typeof(DontAllowAttribute), nameof(DontAllowAttribute.Context), DisplayContexts.None);
+                        if (!(dontAllow.HasFlag(DisplayContexts.List) || dontAllow.HasFlag(DisplayContexts.View)))
+                        {
+                            DisplayContexts customRouteContext = property
+                                    .AttributeStruct<DisplayContexts>(
+                                        typeof(CustomRouteAttribute),
+                                        nameof(CustomRouteAttribute.Context),
+                                        DisplayContexts.None);
+
+                            <td class="list_@property.Name @(property.Attribute<HtmlRenderAttribute>()?.Type)">
+
+                                @{
+                                    o[property].SetParent(o);
+                                    EditorHandlerResult result = DynamicEditorService.FindHandler(o[property], DisplayContexts.List);
+
+                                    if (result is DynamicActionResult ar)
+                                    {
+                                        @Html.MetaRoute(ar.RouteData, o[property]);
+                                    }
+                                    else if (result is DynamicViewResult vr)
+                                    {
+                                        <partial name="@vr.ViewPath" model="@o[property]" />
+                                    }
+                                    else
+                                    {
+                                        if (property.Is<Guid>())
+                                        {
+                                            Guid value = property.GetValue<Guid>(o);
+
+                                            if (value != Guid.Empty)
+                                            {
+                                                @($"*-{value.ToString().FromLast("-")}")
+                                            }
+                                        }
+                                        else if (property.Is<Enum>())
+                                        {
+                                            //Get Value returns differently for ObjectWrapper and MetaObject and this should probably be fixed
+                                            @(property.Type.Values.First(v => v.Value == property.GetValue(o).ToString() || v.Label == property.GetValue(o).ToString()).Label)
+                                        }
+                                        else if (property.Is<bool>())
+                                        {
+                                            if (property.GetValue<bool>(o))
+                                            {
+                                                @Html.MaterialIcon("check_box")
+                                            }
+                                            else
+                                            {
+                                                @Html.MaterialIcon("check_box_outline_blank")
+                                            }
+                                        }
+                                        else
+                                        {
+
+                                            if (o.HasProperty(property))
+                                            {
+                                                IMetaObject val = o[property];
+
+                                                if (property.Type.CoreType == CoreType.Collection)
+                                                {
+
+                                                    <text>@string.Join(", ", val.Properties.Select(prop => prop.Value))</text>
+
+                                                }
+                                                else
+                                                {
+                                                    @(val?.Value)
+
+                                                }
+                                            }
+
+                                        }
+                                    }
+                                }
+
+                            </td>
+
+                        }
+                    }
+                }
+            </tr>
+
+        }
+    </table>
+}

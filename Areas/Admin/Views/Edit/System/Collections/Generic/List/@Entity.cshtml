@@ -1,0 +1,12 @@
+﻿@model MetaObject
+
+@using Penguin.Reflection.Serialization.Objects
+
+@{
+    Layout = null;
+
+    InputListPageModel pageModel = new InputListPageModel(Model, nameof(Entity.ExternalId), nameof(Entity._Id), Urls.SEARCH);
+
+}
+
+<partial name="~/Views/Shared/InputList.cshtml" model="pageModel" />

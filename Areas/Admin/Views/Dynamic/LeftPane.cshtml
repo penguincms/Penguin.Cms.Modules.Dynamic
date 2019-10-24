@@ -1,0 +1,132 @@
+﻿@model string
+@using System.Reflection
+@using Penguin.Reflection
+@using Penguin.Persistence.Abstractions.Attributes;
+
+@{
+    Guid treeGuid = Guid.NewGuid();
+
+    string RootNode = this.Context.Request.Query["Root"];
+    string RootParam = RootNode != null ? "Root=" + RootNode : string.Empty;
+
+    TreeNode<Type> TypeTree = TypeFactory.GetAllTypes().Where(t => {
+        EntityAttribute e = t.GetCustomAttribute<EntityAttribute>();
+
+        return e != null && e.Type == EntityType.Entity;
+    }).ToTree(t => t.FullName, '.', StringComparer.Ordinal);
+
+    if (RootNode != null)
+    {
+        TypeTree = TypeTree.FindNode("." + RootNode);
+    }
+}
+
+@{
+    Func<string, IHtmlContent> RenderIcons = null;
+
+    Func<TreeNode<Type>, IHtmlContent> RenderNode = null;
+    RenderNode = this.Helper((TreeNode<Type> t) =>
+    @<li>
+        @t.Name
+        <ul>
+            @if (t.IsReal)
+            {
+            @RenderIcons(t.Value.FullName)
+            }
+            @foreach (TreeNode<Type> ti in t.Children)
+            {
+            @RenderNode(ti)
+            }
+        </ul>
+    </li>
+    );
+
+    RenderIcons = this.Helper((string Type) =>
+    @<text>
+        <li data-jstree='{"icon":"/Images/Material Icons/web/ic_list_white_18dp.png"}'>
+            <a href="/Admin/List/@Type/?@RootParam">List</a>
+        </li>
+        <li data-jstree='{"icon":"/Images/Material Icons/web/ic_add_box_white_18dp.png"}'>
+            <a href="/Admin/Edit/@Type/?@RootParam">Create</a>
+        </li>
+        <li data-jstree='{"icon":"/Images/Material Icons/web/ic_history_white_18dp.png"}'>
+            <a href="/Admin/Audit/ListEntries?type=@(Type)&@RootParam">Audit Entries</a>
+        </li>
+        <li data-jstree='{"icon":"/Images/Material Icons/web/ic_playlist_add_white_18dp.png"}'>
+            <a href="/Admin/BatchCreate/@(Type)/?@RootParam">Batch Create</a>
+        </li>
+    </text>
+    );
+
+}
+
+<div id="@treeGuid">
+    <ul>
+        @if (!string.IsNullOrWhiteSpace(Model))
+        {
+        <li>
+            @Model.FromLast(".")
+            <ul>
+                @RenderIcons(Model)
+            </ul>
+        </li>
+
+        }
+        <li>
+            @if (!string.IsNullOrWhiteSpace(Model))
+            {
+            <text>Other Types</text>
+            }
+            else
+            {
+            <text>Types</text>
+            }
+            <ul>
+                @{
+
+                    foreach (TreeNode<Type> t in TypeTree.Children)
+                    {
+                        if (t.FullName != Model)
+                        {
+                    @RenderNode(t)
+                        }
+                    }
+                }
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<script>
+	$('#@treeGuid')
+		.jstree({
+			core: {
+				dblclick_toggle: false,
+				themes: {
+					name: "default-dark",
+					dots: true,
+					icons: true,
+					variant: "large"
+				}
+			}
+            });
+
+        $('#@treeGuid').bind("select_node.jstree", function (e, data) {
+            $('#jstree').jstree('save_state');
+        });
+
+    $('#@treeGuid').on("activate_node.jstree", function (e, data) {
+        if (data.event.button !== 2) {
+            if (data.node.a_attr.href === '#') {
+                data.instance.toggle_node(data.node);
+            } else {
+                Site.ShowLoader();
+                window.location.href = data.node.a_attr.href;
+            }
+        }
+	});
+
+	@*$('#@treeGuid').bind("select_node.jstree", function (e, data) {
+		return data.instance.toggle_node(data.node);
+	});*@
+</script>

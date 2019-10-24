@@ -1,0 +1,32 @@
+﻿@model BatchCreatePageModel
+
+@{
+    Layout = "_Layout";
+    Html.IncludeJS("DynamicForm");
+}
+
+@section LeftPane
+    {
+    <partial name="~/Areas/Admin/Views/Dynamic/LeftPane.cshtml" model="string.Empty" />
+}
+
+<div id="Edit">
+    <div id="ErrorMessage">
+    </div>
+
+    <form action="@($"/Admin/BatchCreate")" method="post">
+        <div class="formRow">
+            <span>
+                Input ExternalIds to create, seperated by new lines
+            </span>
+        </div>
+        @Html.HiddenFor(m => m.Type)        <div class="formRow">
+            @Html.TextAreaFor(m => m.ExternalIds)
+        </div>
+        <div class="formRow">
+            <button type="submit">
+                Create
+            </button>
+        </div>
+    </form>
+</div>

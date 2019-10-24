@@ -1,0 +1,11 @@
+﻿@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Reflection.Serialization.Abstractions.Interfaces;
+@using System.Xml;
+
+@model IMetaObject
+
+@{
+    Guid id = Guid.NewGuid();
+}
+
+<a href="@Model.Value">@Model.Value</a>

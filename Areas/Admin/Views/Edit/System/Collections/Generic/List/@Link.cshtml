@@ -1,0 +1,45 @@
+﻿@model MetaObject
+
+@{
+    Layout = null;
+    EditorHandlerResult result = DynamicEditorService.FindHandler(Model, DisplayContexts.Edit, Model.Type.CollectionType);
+
+    string MatchedPath = "~/Areas/Admin/Views/Shared/Edit.cshtml";
+
+    if (result is DynamicViewResult vr)
+    {
+        MatchedPath = vr.ViewPath;
+    }
+}
+
+@{
+	Func<IHtmlContent> DeleteButton = this.Helper(() =>
+    @<div class="deleteContainer">
+        <a href="javascript:void(0)" onclick="$(this).closest('.listValue').remove()" class="delete">
+            @Html.MaterialIcon("delete")
+        </a>
+    </div>
+	);
+}
+<template style="display:none">
+    <value class="listValue">
+        @DeleteButton()
+        <partial name="@MatchedPath" model="@Model.Template" />
+    </value>
+</template>
+<div class="valuesList">
+    @if(Model.CollectionItems != null) {
+        foreach (MetaObject o in Model.CollectionItems)
+        {
+            <value class="listValue">
+                @DeleteButton()
+                <partial name="@MatchedPath" model="@o" />
+            </value>
+        }
+    }
+</div>
+<div class="addContainer">
+    <a href="javascript:void(0)" onclick="CopyTemplate(this);">
+        @Html.MaterialIcon("add_box")
+    </a>
+</div>

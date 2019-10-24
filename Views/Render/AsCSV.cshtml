@@ -1,0 +1,13 @@
+﻿@model IMetaObject
+
+@using Penguin.Reflection.Serialization.Abstractions.Interfaces;
+
+@{
+    Layout = null;
+    IEnumerable<object> collection = Model?.Properties?.Select(p => p.Value);
+}
+
+@if (collection != null)
+{
+@(string.Join(", ", collection))
+}

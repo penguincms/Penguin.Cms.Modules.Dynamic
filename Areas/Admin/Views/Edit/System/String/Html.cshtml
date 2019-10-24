@@ -1,0 +1,43 @@
+﻿@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Reflection.Serialization.Abstractions.Interfaces;
+@using System.Xml;
+
+@model IMetaObject
+
+@{
+    Guid id = Guid.NewGuid();
+}
+
+<div id="Edit">
+    <div class="ui-tabs">
+        <ul>
+            <li><a href="#Raw">Raw</a></li>
+
+            <li><a href="#Preview">Preview</a></li>
+        </ul>
+        <div id="Raw">
+            <textarea id="@id" name="@Model.Property.Name">@Model.Value</textarea>
+        </div>
+
+        <div id="Preview">
+            <iframe style="width: 100%; height: 100%;" src="data:text/html;base64, @System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(Model?.Value ?? ""))"></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var editor = CodeMirror.fromTextArea(document.getElementById('@id'), {
+            lineNumbers: true,
+        });
+
+        editor.on("change", function (cm, change) {
+            $('#@id').val(cm.getValue());
+            $('#Preview iframe').attr('src', 'data:text/html;base64, ' + btoa(cm.getValue()));
+        })
+
+        $(function () {
+            $("#Preview").resizable();
+        });
+    });
+</script>

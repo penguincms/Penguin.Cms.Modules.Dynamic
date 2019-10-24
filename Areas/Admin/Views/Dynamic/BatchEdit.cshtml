@@ -1,0 +1,25 @@
+﻿@model IMetaObject
+
+@{
+	Layout = "_Layout";
+}
+
+@using Penguin.Reflection.Serialization.Abstractions.Interfaces
+
+@section LeftPane
+{
+    <partial name="~/Areas/Admin/Views/Dynamic/LeftPane.cshtml" model="@string.Empty" />
+}
+
+<div id="Edit">
+    <div id="ErrorMessage">
+    </div>
+
+    <form method="post">
+        <partial name="Edit" model="@Model" />
+
+        <button type="button" onclick="Meta.Submit('/Admin/BatchSave', true);">
+            Save
+        </button>
+    </form>
+</div>

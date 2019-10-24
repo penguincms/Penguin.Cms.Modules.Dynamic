@@ -1,0 +1,17 @@
+﻿@model MetaObject
+
+@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Persistence.Abstractions.Attributes.Relations;
+@using Penguin.Reflection.Serialization.Abstractions.Interfaces;
+@using Penguin.Reflection.Serialization.Extensions;
+
+@{
+    Layout = null;
+    IMetaAttribute mapAttribute = Model.Property.Attributes.Single(a => a.Type.FullName == typeof(MapAttribute).FullName);
+    string KeyName = mapAttribute.Instance.GetProperty("SetMapping.Right.Property").Value;
+    string RightTypeName = mapAttribute.Instance.GetProperty("SetMapping.Right.Type").Value;
+
+    InputListPageModel pageModel = new InputListPageModel(Model, KeyName, KeyName, string.Format(Urls.SEARCH, RightTypeName));
+}
+
+<partial name="~/Views/Shared/InputList.cshtml" model="pageModel" />

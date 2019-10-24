@@ -1,0 +1,86 @@
+﻿@model EntityViewModel<IMetaObject>
+
+@{
+    string ID = Guid.NewGuid().ToString().Replace("-", "");
+}
+
+@if (Model.Target is null)
+{
+    <span>Can not edit a null object model</span>
+    return;
+}
+
+@{
+    Html.IncludeJS("/lib/CKEditor/ckeditor",
+               "/lib/CKEditor/config",
+               "/lib/CodeMirror/lib/codemirror",
+               "/lib/CodeMirror/mode/htmlmixed/htmlmixed",
+               "admin/page");
+
+    Html.IncludeCSS("/lib/CKEditor/skins/moono-lisa/editor",
+                "/lib/CodeMirror/lib/codemirror");
+
+    bool isEditable = !(Model.Target.Type.AttributeStruct(typeof(DontAllowAttribute), nameof(DontAllowAttribute.Context), DisplayContexts.None).HasFlag(DisplayContexts.Edit));
+
+    Layout = "_Layout";
+
+    object KnownControllerV = this.Context.GetRouteData().Values["KnownController"];
+    bool KnownController = KnownControllerV != null && bool.Parse(KnownControllerV.ToString());
+
+    Guid objectGuid = ContextHelper.GetGuid(Model.Target);
+}
+
+@if (!KnownController)
+{
+    @section LeftPane {
+        @{
+            string TypeName = Model.Target.Type.Namespace == "System.Data.Entity.DynamicProxies" ? Model.Target.Type.BaseType.FullName : Model.Target.Type.FullName;
+        }
+        <partial name="~/Areas/Admin/Views/Dynamic/LeftPane.cshtml" model="TypeName" />
+    }
+}
+
+<div id="Edit" KeyProvider>
+    <div class="ui-tabs">
+        <ul>
+            <li><a href="#Settings">Settings</a></li>
+            @foreach (ViewModule vm in Model.Modules)
+            {
+                <li><a href="#@vm.Id">@vm.Name</a></li>
+            }
+        </ul>
+        <div id="Settings">
+            <div id="ErrorMessage">
+            </div>
+
+            <label for="showDisabled">
+                Show Disabled Editors
+            </label>
+            <input type="checkbox" name="showDisabled" id="showDisabled" />
+
+            <form id="@ID">
+                <partial name="~/Areas/Admin/Views/Shared/Edit.cshtml" model="@Model.Target" />
+            </form>
+
+            @if (isEditable)
+            {
+
+                <button type="button" onclick="KeyProvider.Submit()">
+                    Save
+                </button>
+            }
+        </div>
+        @foreach (ViewModule vm in Model.Modules)
+        {
+            <div id="@vm.Id">
+                <partial name="@vm.ViewPath" model="@vm.Model" />
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    KeyProvider.AddFunction(function () {
+        return Meta.Submit('/Admin/Submit/@Model.Target.Type.GetUnproxifiedName()/', '@ID', true);
+    }, true);
+</script>

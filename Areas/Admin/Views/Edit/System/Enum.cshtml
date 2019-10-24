@@ -1,0 +1,11 @@
+﻿@model MetaObject
+
+@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Reflection.Serialization.Extensions;
+
+<select name="@Model.Property.Name">
+    @foreach (EnumValue thisValue in Model.Type.Values)
+    {
+    <!option value="@thisValue.Value" @Html.Attribute("selected", thisValue.Value == Model.Value)>@thisValue.Label</!option>
+    }
+</select>

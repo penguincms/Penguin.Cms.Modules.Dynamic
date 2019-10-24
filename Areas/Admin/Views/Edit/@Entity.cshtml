@@ -1,0 +1,11 @@
+﻿@model IMetaObject
+
+@using Penguin.Reflection.Serialization.Abstractions.Interfaces;
+
+@{
+    Layout = null;
+
+    InputListPageModel pageModel = new InputListPageModel(Model, nameof(Entity.ExternalId), nameof(Entity._Id), Urls.SEARCH);
+}
+
+<partial name="~/Views/Shared/InputList.cshtml" model="pageModel" />

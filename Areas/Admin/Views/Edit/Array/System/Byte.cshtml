@@ -1,0 +1,19 @@
+﻿@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Reflection.Serialization.Abstractions.Interfaces;
+@using Penguin.Reflection.Extensions
+@using System.Text;
+
+@model MetaObject
+
+@{
+    StringBuilder toRender = new StringBuilder();
+
+    toRender.Append("0x");
+
+    foreach (IMetaObject child in Model.CollectionItems)
+    {
+        toRender.Append(int.Parse(child.Value).ToString("X"));
+    }
+}
+
+<span>@toRender.ToString()</span>

@@ -1,0 +1,55 @@
+﻿@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Reflection.Serialization.Abstractions.Interfaces;
+@using System.Xml;
+
+@model IMetaObject
+
+@{
+    Layout = null;
+
+    Guid treeGuid = Guid.NewGuid();
+
+    XmlDocument xml = new XmlDocument();
+    xml.LoadXml(Model.Value); // suppose that myXmlString contains "<Names>...</Names>"
+
+    Func<XmlNode, IHtmlContent> RenderNode = null;
+
+    RenderNode = this.Helper((XmlNode node) =>
+    @<property>
+
+        <name>@node.Name</name>
+
+        @if (node.HasChildNodes)
+        {
+        <value>
+            @foreach (XmlNode cnode in node.ChildNodes)
+                {
+            @if (cnode.HasChildNodes || !string.IsNullOrWhiteSpace(cnode.Value))
+                    {
+                        if (cnode.Name == "#text")
+                        {
+            @cnode.InnerText
+                        }
+                        else
+                        {
+            @RenderNode(cnode)
+                        }
+                    }
+                }
+        </value>
+        }
+        else
+        {
+        <value> @node.InnerText </value>
+        }
+    </property>
+    );
+
+}
+
+<div class="XML">
+    @foreach (XmlNode node in xml.ChildNodes)
+    {
+    @RenderNode(node)
+    }
+</div>

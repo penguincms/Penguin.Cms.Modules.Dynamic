@@ -1,0 +1,16 @@
+﻿@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Reflection.Serialization.Extensions;
+@using Penguin.Reflection.Serialization.Abstractions.Interfaces;
+@using Penguin.Reflection.Extensions
+@model MetaObject
+
+@{
+    bool Value = Model.GetValue<bool>();
+
+    Layout = null;
+}
+
+<select name="@Model.Property.Name">
+    <!option value="false" @Html.Attribute("selected", !Value)>False</!option>
+    <!option value="true" @Html.Attribute("selected", Value)>True</!option>
+</select>

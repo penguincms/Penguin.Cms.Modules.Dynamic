@@ -1,0 +1,28 @@
+﻿@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Reflection.Serialization.Extensions;
+
+@model MetaObject
+
+@{
+
+    DateTime Value = Model.GetValue<DateTime>();
+    DateTime Min = Model?.Property.MinValue<DateTime>() ?? DateTime.MinValue;
+    DateTime Max = Model?.Property.MaxValue<DateTime>() ?? DateTime.MaxValue;
+
+    if (Value < Min)
+    {
+        Value = Min;
+    }
+    else if (Value > Max)
+    {
+        Value = Max;
+    }
+
+    string ValueString = Value.ToString("yyyy-MM-ddTHH:mm:ss");
+
+    string MinValue = Min.ToString("yyyy-MM-ddTHH:mm:ss");
+
+    string MaxValue = Max.ToString("yyyy-MM-ddTHH:mm:ss");
+}
+
+<input name="@Model.Property.Name" type="datetime-local" value="@ValueString" min="@MinValue" max="@MaxValue" step="1" />

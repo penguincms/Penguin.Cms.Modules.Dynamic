@@ -1,0 +1,23 @@
+﻿@using Penguin.Persistence.Abstractions.Attributes.Rendering;
+@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Reflection.Serialization.Extensions;
+@using Penguin.Reflection.Serialization.Abstractions.Interfaces;
+
+@model IMetaObject
+
+@{
+    Layout = null;
+}
+
+@{
+    HtmlRenderAttribute.RenderingType RenderingType = Model.Property.AttributeStruct<HtmlRenderAttribute.RenderingType>(typeof(HtmlRenderAttribute), nameof(HtmlRenderAttribute.Type), HtmlRenderAttribute.RenderingType.text);
+
+    if (RenderingType == HtmlRenderAttribute.RenderingType.textarea)
+    {
+    <textarea name="@Model.Property.Name">@Model.Value</textarea>
+    }
+    else
+    {
+    <input name="@Model.Property.Name" type="@RenderingType" value="@Model.Value" autocomplete="off" />
+    }
+}

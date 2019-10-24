@@ -1,0 +1,15 @@
+﻿@model IMetaObject
+
+@{ 
+    string ID = Guid.NewGuid().ToString().Replace("-", "");
+}
+
+<form id="@ID">
+    <partial name="~/Areas/Admin/Views/Shared/Edit.cshtml" model="@Model" />
+</form>
+
+<script>
+    KeyProvider.AddFunction(function () {
+        return Meta.Submit('/Admin/Submit/@Model.Type.GetUnproxifiedName()/', '@ID', true);
+    })
+</script>

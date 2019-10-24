@@ -1,0 +1,41 @@
+﻿@model IMetaObject
+
+@using Penguin.Reflection.Serialization.Abstractions.Interfaces;
+
+@{
+    Model.Hydrate();
+    Layout = null;
+    List<string> MaterialIcons = Penguin.Cms.Web.Constants.Strings.MaterialIcons.AllNames;
+    Guid iconGuid = Guid.NewGuid();
+}
+
+<div class="iconWrapper" id="@iconGuid">
+    <input type="text" value="@Model.Value" name="@Model.Property.Name" />
+
+    <div class="iconSelectionPanel">
+        @foreach (string s in MaterialIcons)
+        {
+        <span class="iconRow" onclick="$(this).closest('.iconWrapper').find('input').val('@s')" data-iconname="@s">
+            @Html.MaterialIcon(s)
+            <span>@s</span>
+        </span>
+        }
+    </div>
+
+    <script>
+        $('#@iconGuid').keyup(
+            function () {
+                var selectorVal = $('#@iconGuid input').val();
+                $('#@iconGuid .iconRow').each(
+                    function (i, e) {
+                        if (selectorVal === '' || $(e).attr('data-iconname').indexOf(selectorVal) > -1) {
+                            $(e).show();
+                        } else {
+                            $(e).hide();
+                        }
+                    }
+                );
+            }
+        );
+    </script>
+</div>
