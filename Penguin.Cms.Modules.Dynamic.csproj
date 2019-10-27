@@ -10,7 +10,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Remove="wwwroot\**\*" />
-    <PackageReference Include="Penguin.Cms.Errors" Version="1.0.0-63707627121" />
+    <PackageReference Include="Penguin.Cms.Errors" Version="1.0.0-T9LXGUJ" />
+    <PackageReference Include="Penguin.Cms.Modules.Admin" Version="1.0.0-T9LXGUJ" />
+    <PackageReference Include="Penguin.Cms.Repositories" Version="3.0.3-T9LXGUJ" />
+    <PackageReference Include="Penguin.Shared.Objects" Version="2.0.1-T9LXGUJ" />
+    <PackageReference Include="Penguin.Web.Dynamic" Version="1.0.0-T9LXGUJ" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="wwwroot\**\*" />
@@ -21,17 +25,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="3.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="Penguin.Cms.Entities" Version="3.0.3" />
-    <PackageReference Include="Penguin.Cms.Modules.Admin" Version="1.0.0" />
-    <PackageReference Include="Penguin.Cms.Repositories" Version="3.0.3" />
-    <PackageReference Include="Penguin.Cms.Web" Version="1.0.0" />
-    <PackageReference Include="Penguin.Persistence.Abstractions" Version="3.0.1" />
-    <PackageReference Include="Penguin.Reflection.Serialization" Version="3.0.6" />
-    <PackageReference Include="Penguin.Reflection.Serialization.Abstractions" Version="3.0.0" />
-    <PackageReference Include="Penguin.Security.Abstractions" Version="2.0.0" />
-    <PackageReference Include="Penguin.Shared.Objects" Version="2.0.1" />
-    <PackageReference Include="Penguin.Web.Dynamic" Version="1.0.0" />
-    <PackageReference Include="Penguin.Web.Security" Version="2.0.0" />
   </ItemGroup>
   <Import Project="Penguin.Projects.Shared\Penguin.Projects.Shared.csproj" />
 </Project>
