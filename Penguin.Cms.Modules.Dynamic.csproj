@@ -7,14 +7,16 @@
     <PackageProjectUrl>https://github.com/penguincms/Penguin.Cms.Modules.Dynamic</PackageProjectUrl>
     <Version>1.0.0</Version>
     <Description>Not Available</Description>
+    <AssemblyName>Penguin.Cms.Modules.Dynamic</AssemblyName>
+    <RootNamespace>Penguin.Cms.Modules.Dynamic</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Content Remove="wwwroot\**\*" />
-    <PackageReference Include="Penguin.Cms.Errors" Version="1.0.1-T9M1HHH" />
-    <PackageReference Include="Penguin.Cms.Repositories" Version="3.0.4-T9M1HHH" />
-    <PackageReference Include="Penguin.Shared.Objects" Version="2.0.2-T9M1HHH" />
-    <PackageReference Include="Penguin.Web.Dynamic" Version="1.0.1-T9M1HHH" />
-    <PackageReference Include="Penguin.Cms.Modules.Admin" Version="1.0.1-T9M1K2Y" />
+    <PackageReference Include="Penguin.Cms.Errors" Version="1.0.1-T9M2XAX" />
+    <PackageReference Include="Penguin.Cms.Repositories" Version="3.0.4-T9M2XAX" />
+    <PackageReference Include="Penguin.Shared.Objects" Version="2.0.2-T9M2XAX" />
+    <PackageReference Include="Penguin.Web.Dynamic" Version="1.0.1-T9M2XAX" />
+    <PackageReference Include="Penguin.Cms.Modules.Admin" Version="1.0.1-T9M2XAX" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="wwwroot\**\*" />
