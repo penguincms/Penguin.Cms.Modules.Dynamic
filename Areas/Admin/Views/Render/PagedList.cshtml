@@ -16,6 +16,19 @@
         {
             Model.PostbackParameters.Add(keys[i], Context.Request.Form[keys[i]]);
         }
+
+        keys = Context.Request.Query.Keys.ToArray();
+        for (int i = 0; i < keys.Length; i++)
+        {
+            if (!Model.PostbackParameters.ContainsKey(keys[i]))
+            {
+                Model.PostbackParameters.Add(keys[i], Context.Request.Query[keys[i]]);
+            } else
+            {
+                <text><!-- Postback model already contains parameter @keys[i]  from post when attempt was made to add from query --></text>
+            }
+        }
+
     }
 
     bool HasText = Model.PostbackParameters.ContainsKey("text");

@@ -13,10 +13,10 @@
   <ItemGroup>
     <Content Remove="wwwroot\**\*" />
     <PackageReference Include="Penguin.Shared.Objects" Version="2.0.2-T9MJL4F" />
-    <PackageReference Include="Penguin.Web.Dynamic" Version="1.0.1-T9MJL4F" />
     <PackageReference Include="Penguin.Cms.Errors" Version="1.0.1-T9MNBFG" />
     <PackageReference Include="Penguin.Cms.Repositories" Version="3.0.4-T9MNBFG" />
-    <PackageReference Include="Penguin.Cms.Modules.Admin" Version="1.0.1-T9N916Q" />
+    <PackageReference Include="Penguin.Web.Dynamic" Version="1.0.1-T9O8EAS" />
+    <PackageReference Include="Penguin.Cms.Modules.Admin" Version="1.0.1-T9O9XC4" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="wwwroot\**\*" />
