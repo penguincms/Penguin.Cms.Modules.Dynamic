@@ -204,12 +204,12 @@ var Meta = {
         return $('#' + Id + ' property[data-isroot="True"]')[0];
     },
     RootContainer: function (Id) {
-        var root = $('#' + Id + ' property[data-isroot="True"]')[0];
+        var root = $('#' + Id + ' property[data-isroot="True"]')[0] || $('#' + Id + '[data-isroot="True"]')[0];
 
         if (root.closest('root')) {
             return root.closest('root');
         } else {
-            return $('#' + Id + ' property[data-isroot="True"]')[0];
+            return root;
         }
     },
     GetJson: function (Id) {
