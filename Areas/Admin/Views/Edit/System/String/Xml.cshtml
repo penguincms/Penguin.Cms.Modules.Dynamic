@@ -21,26 +21,26 @@
 
         @if (node.HasChildNodes)
         {
-        <value>
-            @foreach (XmlNode cnode in node.ChildNodes)
+            <value>
+                @foreach (XmlNode cnode in node.ChildNodes)
                 {
-            @if (cnode.HasChildNodes || !string.IsNullOrWhiteSpace(cnode.Value))
+                    @if (cnode.HasChildNodes || !string.IsNullOrWhiteSpace(cnode.Value))
                     {
                         if (cnode.Name == "#text")
                         {
-            @cnode.InnerText
+                            @cnode.InnerText
                         }
                         else
                         {
-            @RenderNode(cnode)
+                            @RenderNode(cnode)
                         }
                     }
                 }
-        </value>
+            </value>
         }
         else
         {
-        <value> @node.InnerText </value>
+            <value> @node.InnerText </value>
         }
     </property>
     );
@@ -50,6 +50,6 @@
 <div class="XML">
     @foreach (XmlNode node in xml.ChildNodes)
     {
-    @RenderNode(node)
+        @RenderNode(node)
     }
 </div>

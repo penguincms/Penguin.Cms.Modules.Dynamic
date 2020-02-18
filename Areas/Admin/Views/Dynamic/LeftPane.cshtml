@@ -9,7 +9,8 @@
     string RootNode = this.Context.Request.Query["Root"];
     string RootParam = RootNode != null ? "Root=" + RootNode : string.Empty;
 
-    TreeNode<Type> TypeTree = TypeFactory.GetAllTypes().Where(t => {
+    TreeNode<Type> TypeTree = TypeFactory.GetAllTypes().Where(t =>
+    {
         EntityAttribute e = t.GetCustomAttribute<EntityAttribute>();
 
         return e != null && e.Type == EntityType.Entity;
@@ -31,11 +32,11 @@
         <ul>
             @if (t.IsReal)
             {
-            @RenderIcons(t.Value.FullName)
+                @RenderIcons(t.Value.FullName)
             }
             @foreach (TreeNode<Type> ti in t.Children)
             {
-            @RenderNode(ti)
+                @RenderNode(ti)
             }
         </ul>
     </li>
@@ -64,22 +65,22 @@
     <ul>
         @if (!string.IsNullOrWhiteSpace(Model))
         {
-        <li>
-            @Model.FromLast(".")
-            <ul>
-                @RenderIcons(Model)
-            </ul>
-        </li>
+            <li>
+                @Model.FromLast(".")
+                <ul>
+                    @RenderIcons(Model)
+                </ul>
+            </li>
 
         }
         <li>
             @if (!string.IsNullOrWhiteSpace(Model))
             {
-            <text>Other Types</text>
+                <text>Other Types</text>
             }
             else
             {
-            <text>Types</text>
+                <text>Types</text>
             }
             <ul>
                 @{
@@ -88,7 +89,7 @@
                     {
                         if (t.FullName != Model)
                         {
-                    @RenderNode(t)
+                            @RenderNode(t)
                         }
                     }
                 }

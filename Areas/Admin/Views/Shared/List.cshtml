@@ -11,9 +11,9 @@
 
 @if (!KnownController)
 {
-@section LeftPane {
-    <partial name="~/Areas/Admin/Views/Dynamic/LeftPane.cshtml" model="@Model.Type" />
-}
+    @section LeftPane {
+        <partial name="~/Areas/Admin/Views/Dynamic/LeftPane.cshtml" model="@Model.Type" />
+    }
 }
 
 <form id="@formGuid" action="/Admin/Dynamic/UpdateList" method="post" class="DynamicList">

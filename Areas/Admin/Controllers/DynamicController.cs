@@ -35,12 +35,11 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
     [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters")]
     public class DynamicController : ObjectManagementController<Entity>
     {
+        private const string SUCCESSFUL_SAVE_MESSAGE = "The object was successfully saved";
         protected IRepository<AuditableError> ErrorRepository { get; set; }
 
         protected IFileProvider FileProvider { get; set; }
         protected MessageBus? MessageBus { get; set; }
-
-        private const string SUCCESSFUL_SAVE_MESSAGE = "The object was successfully saved";
 
         public DynamicController(IServiceProvider serviceProvider, IFileProvider fileProvider, IRepository<AuditableError> errorRepository, MessageBus? messageBus = null) : base(serviceProvider)
         {

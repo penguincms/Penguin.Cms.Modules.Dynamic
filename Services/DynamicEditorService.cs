@@ -24,9 +24,8 @@ namespace Penguin.Cms.Modules.Dynamic.Services
 {
     public class DynamicEditorService : ISelfRegistering
     {
-        protected IFileProvider FileProvider { get; set; }
-
         public static ConcurrentDictionary<string, string> Views = new ConcurrentDictionary<string, string>();
+        protected IFileProvider FileProvider { get; set; }
 
         public DynamicEditorService(IFileProvider fileProvider)
         {

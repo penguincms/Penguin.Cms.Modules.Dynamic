@@ -13,13 +13,13 @@
 }
 
 @{
-	Func<IHtmlContent> DeleteButton = this.Helper(() =>
+    Func<IHtmlContent> DeleteButton = this.Helper(() =>
     @<div class="deleteContainer">
         <a href="javascript:void(0)" onclick="$(this).closest('.listValue').remove()" class="delete">
             @Html.MaterialIcon("delete")
         </a>
     </div>
-	);
+    );
 }
 <template style="display:none">
     <value class="listValue">
@@ -28,7 +28,8 @@
     </value>
 </template>
 <div class="valuesList">
-    @if(Model.CollectionItems != null) {
+    @if (Model.CollectionItems != null)
+    {
         foreach (MetaObject o in Model.CollectionItems)
         {
             <value class="listValue">

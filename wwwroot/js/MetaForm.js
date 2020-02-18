@@ -42,7 +42,7 @@ var KeyProvider = {
         this.SaveFunctions.push({
             ToExecute: func,
             KeyFunction: !!keyFunc,
-            Callback : callback
+            Callback: callback
         });
     }
 };
@@ -61,7 +61,6 @@ $(document).ready(function () {
     });
 
     Meta.AttachSearchHandler();
-
 });
 
 //Move this into the meta object

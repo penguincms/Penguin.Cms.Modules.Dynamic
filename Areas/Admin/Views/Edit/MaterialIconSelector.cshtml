@@ -15,10 +15,10 @@
     <div class="iconSelectionPanel">
         @foreach (string s in MaterialIcons)
         {
-        <span class="iconRow" onclick="$(this).closest('.iconWrapper').find('input').val('@s')" data-iconname="@s">
-            @Html.MaterialIcon(s)
-            <span>@s</span>
-        </span>
+            <span class="iconRow" onclick="$(this).closest('.iconWrapper').find('input').val('@s')" data-iconname="@s">
+                @Html.MaterialIcon(s)
+                <span>@s</span>
+            </span>
         }
     </div>
 
