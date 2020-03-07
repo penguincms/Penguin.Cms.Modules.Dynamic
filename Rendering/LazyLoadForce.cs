@@ -34,7 +34,7 @@ namespace Penguin.Cms.Modules.Dynamic.Rendering
 
             if (existingValue != null)
             {
-                foreach (object? o in (existingValue as IEnumerable).ToGenericList())
+                foreach (object? _ in (existingValue as IEnumerable).ToGenericList())
                 {
                 }
             }

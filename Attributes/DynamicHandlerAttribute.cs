@@ -16,9 +16,9 @@ namespace Penguin.Cms.Modules.Dynamic.Attributes
                 throw new ArgumentException(nameof(toHandle), "Must specify at least one type to handle");
             }
 
-            DisplayContexts = context;
+            this.DisplayContexts = context;
 
-            ToHandle = toHandle;
+            this.ToHandle = toHandle;
         }
     }
 }

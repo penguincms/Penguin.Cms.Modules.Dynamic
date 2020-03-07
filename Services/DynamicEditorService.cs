@@ -24,13 +24,12 @@ namespace Penguin.Cms.Modules.Dynamic.Services
 {
     public class DynamicEditorService : ISelfRegistering
     {
-        protected IFileProvider FileProvider { get; set; }
-
         public static ConcurrentDictionary<string, string> Views = new ConcurrentDictionary<string, string>();
+        protected IFileProvider FileProvider { get; set; }
 
         public DynamicEditorService(IFileProvider fileProvider)
         {
-            FileProvider = fileProvider;
+            this.FileProvider = fileProvider;
         }
 
         public static HtmlString JoinAttributes(Dictionary<string, object> Attributes)
@@ -54,13 +53,18 @@ namespace Penguin.Cms.Modules.Dynamic.Services
 
         public EditorHandlerResult FindHandler(IMetaObject metaObject, DisplayContexts requestContext, IMetaType displayType = null)
         {
+            if (metaObject is null)
+            {
+                throw new ArgumentNullException(nameof(metaObject));
+            }
+
             if (metaObject.Property?.HasAttribute<ForceDynamicAttribute>() ?? false)
             {
                 return new DynamicEditorResult();
             }
 
-            return GetAction(metaObject, requestContext, displayType) as EditorHandlerResult ??
-                   GetView(metaObject, requestContext, displayType) as EditorHandlerResult ??
+            return this.GetAction(metaObject, requestContext, displayType) as EditorHandlerResult ??
+                   this.GetView(metaObject, requestContext, displayType) as EditorHandlerResult ??
                    (metaObject.GetCoreType() == CoreType.Value ?
                                                 new StaticValueResult() as EditorHandlerResult :
                                                 new DynamicEditorResult() as EditorHandlerResult);
@@ -78,7 +82,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
                     {
                         if (metaObject.Property.Name == propertyAttribute.PropertyName && metaObject.GetParent().Type.Is(propertyAttribute.Type))
                         {
-                            return GetActionResult(methodInfo);
+                            return this.GetActionResult(methodInfo);
                         }
                     }
                 }
@@ -87,7 +91,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
                 {
                     if (attribute.ToHandle.FirstOrDefault(t => displayType.Is(t)) is Type handledType)
                     {
-                        return GetActionResult(methodInfo);
+                        return this.GetActionResult(methodInfo);
                     }
                 }
             }
@@ -117,13 +121,13 @@ namespace Penguin.Cms.Modules.Dynamic.Services
             }
 
             IMetaProperty property = metaObject.Property;
-            displayType ??= GetDisplayType(metaObject);
+            displayType ??= this.GetDisplayType(metaObject);
 
             string Key = $"{displayType.AssemblyQualifiedName}+{property?.Name}+{requestContext}";
 
             if (!Views.TryGetValue(Key, out string path))
             {
-                DynamicRenderer renderer = new DynamicRenderer(new DynamicRendererSettings(displayType, property, FileProvider)
+                DynamicRenderer renderer = new DynamicRenderer(new DynamicRendererSettings(displayType, property, this.FileProvider)
                 {
                     BasePath = BasePath
                 });
@@ -149,6 +153,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "<Pending>")]
         private DynamicActionResult GetActionResult(MethodInfo methodInfo)
         {
             Dictionary<string, object> routeData = new Dictionary<string, object>

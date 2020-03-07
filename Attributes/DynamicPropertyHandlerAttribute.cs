@@ -12,9 +12,9 @@ namespace Penguin.Cms.Modules.Dynamic.Attributes
 
         public DynamicPropertyHandlerAttribute(DisplayContexts context, Type type, string propertyName)
         {
-            DisplayContexts = context;
-            Type = type;
-            PropertyName = propertyName;
+            this.DisplayContexts = context;
+            this.Type = type;
+            this.PropertyName = propertyName;
         }
     }
 }

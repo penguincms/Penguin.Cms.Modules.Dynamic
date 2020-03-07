@@ -14,7 +14,6 @@ using Penguin.Reflection;
 using Penguin.Reflection.Serialization.Abstractions.Interfaces;
 using Penguin.Reflection.Serialization.Constructors;
 using Penguin.Reflection.Serialization.Objects;
-using Penguin.Security.Abstractions.Attributes;
 using Penguin.Security.Abstractions.Constants;
 using Penguin.Web.Security.Attributes;
 using System;
@@ -34,7 +33,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
         public ObjectManagementController(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            ComponentService = new ComponentService(serviceProvider);
+            this.ComponentService = new ComponentService(serviceProvider);
             //UserSession = userSession;
             //AuditEntryRepository = auditEntryRepository;
         }
@@ -50,7 +49,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             {
                 if (t.IsSubclassOf(typeof(KeyedObject)))
                 {
-                    toEdit = ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t)?.Find(id.Value);
+                    toEdit = this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t)?.Find(id.Value);
                 }
                 else
                 {
@@ -126,7 +125,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             Type lt = TypeFactory.GetTypeByFullName(temporaryEntity.TypeName, typeof(Entity));
 
-            IEntityRepository ltTypeRepository = (IEntityRepository)ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(lt));
+            IEntityRepository ltTypeRepository = (IEntityRepository)this.ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(lt));
 
             Entity? existingValue;
             //Maybe we have the ID
@@ -144,11 +143,11 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
                     foreach (Type t in toSearch)
                     {
-                        ltTypeRepository = (IEntityRepository)ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(t));
+                        ltTypeRepository = (IEntityRepository)this.ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(t));
 
                         if (ltTypeRepository.IsValid)
                         {
-                            Entity guidMatch = (Entity)ltTypeRepository.Find(temporaryEntity.Guid);
+                            Entity guidMatch = ltTypeRepository.Find(temporaryEntity.Guid);
 
                             if (guidMatch != null)
                             {
@@ -162,6 +161,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             return existingValue ?? temporaryEntity;
         }
 
+        [SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "<Pending>")]
         public ActionResult Search(string type, string term, int limit = 10)
         {
             List<Type> typesToSearch = TypeFactory.GetDerivedTypes(TypeFactory.GetTypeByFullName(type)).ToList();
@@ -174,9 +174,9 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             foreach (Type t in typesToSearch)
             {
-                if (results.Count() < limit)
+                if (results.Count < limit)
                 {
-                    IEntityRepository? TypedRepository = (IEntityRepository)ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(t));
+                    IEntityRepository? TypedRepository = (IEntityRepository)this.ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(t));
 
                     if (TypedRepository != null && TypedRepository.IsValid)
                     {
@@ -187,7 +187,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 }
             }
 
-            if (results.Count() > limit)
+            if (results.Count > limit)
             {
                 results = results.Take(limit).ToList();
             }
@@ -206,18 +206,19 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
         protected virtual ActionResult Edit(object o)
         {
-            if (o is null)
+            if (o is Entity e)
+            {
+                MetaObject i = MetaObject.FromConstructor(Constructor.Clone(o));
+
+                i.Hydrate();
+
+                EntityViewModel<IMetaObject> model = new EntityViewModel<IMetaObject>(i, this.ComponentService.GetComponents<ViewModule, Entity>(e).ToList());
+
+                return this.View("DynamicEditor", model);
+            } else
             {
                 throw new ArgumentNullException(nameof(o));
             }
-
-            MetaObject i = MetaObject.FromConstructor(Constructor.Clone(o));
-
-            i.Hydrate();
-
-            EntityViewModel<IMetaObject> model = new EntityViewModel<IMetaObject>(i, ComponentService.GetComponents<ViewModule, Entity>(o as Entity).ToList());
-
-            return this.View("DynamicEditor", model);
         }
     }
 }

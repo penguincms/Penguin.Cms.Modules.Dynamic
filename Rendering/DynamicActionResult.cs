@@ -8,7 +8,7 @@ namespace Penguin.Cms.Modules.Dynamic.Rendering
 
         public DynamicActionResult(Dictionary<string, object> routeData)
         {
-            RouteData = routeData;
+            this.RouteData = routeData;
         }
     }
 }

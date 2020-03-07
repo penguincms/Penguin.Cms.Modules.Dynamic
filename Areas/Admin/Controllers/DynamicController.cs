@@ -35,18 +35,17 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
     [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters")]
     public class DynamicController : ObjectManagementController<Entity>
     {
+        private const string SUCCESSFUL_SAVE_MESSAGE = "The object was successfully saved";
         protected IRepository<AuditableError> ErrorRepository { get; set; }
 
         protected IFileProvider FileProvider { get; set; }
         protected MessageBus? MessageBus { get; set; }
 
-        private const string SUCCESSFUL_SAVE_MESSAGE = "The object was successfully saved";
-
         public DynamicController(IServiceProvider serviceProvider, IFileProvider fileProvider, IRepository<AuditableError> errorRepository, MessageBus? messageBus = null) : base(serviceProvider)
         {
-            FileProvider = fileProvider;
-            MessageBus = messageBus;
-            ErrorRepository = errorRepository;
+            this.FileProvider = fileProvider;
+            this.MessageBus = messageBus;
+            this.ErrorRepository = errorRepository;
         }
 
         [HttpPost]
@@ -64,7 +63,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             try
             {
-                IEntityRepository thisRepo = (IEntityRepository)ServiceProvider.GetService(typeof(IRepository<>).MakeGenericType(type));
+                IEntityRepository thisRepo = (IEntityRepository)this.ServiceProvider.GetService(typeof(IRepository<>).MakeGenericType(type));
 
                 using IWriteContext context = thisRepo.WriteContext();
                 foreach (string thisExternalId in model.ExternalIds.TrimLines())
@@ -86,7 +85,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                ErrorRepository.TryAdd(ex);
+                this.ErrorRepository.TryAdd(ex);
 
                 this.AddMessage(ex.Message);
                 return this.View(model);
@@ -100,7 +99,10 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public virtual ActionResult BatchCreate(string Type) => this.View(new BatchCreatePageModel() { Type = Type });
+        public virtual ActionResult BatchCreate(string Type)
+        {
+            return this.View(new BatchCreatePageModel() { Type = Type });
+        }
 
         [HttpPost]
         public virtual ActionResult BatchEdit(UpdateListPageModel items)
@@ -116,7 +118,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             //We're gonna use this to determine the eventual return type of the list
             Type commonType = Entities.GetCommonType();
 
-            DynamicRenderer renderer = new DynamicRenderer(new DynamicRendererSettings(commonType, FileProvider) { ExactOnly = true });
+            DynamicRenderer renderer = new DynamicRenderer(new DynamicRendererSettings(commonType, this.FileProvider) { ExactOnly = true });
 
             BatchEditModelPageModel BEmodel = new BatchEditModelPageModel
             {
@@ -137,7 +139,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             try
             {
-                using IWriteContext context = ServiceProvider.GetService<IPersistenceContext>().WriteContext();
+                using IWriteContext context = this.ServiceProvider.GetService<IPersistenceContext>().WriteContext();
                 List<object> Entities = this.GetEntitiesByGuids(JsonConvert.DeserializeObject<BatchEditModelPageModel>(json).Guids.Select(g => Guid.Parse(g)).ToList());
 
                 commonType = Entities.GetCommonType();
@@ -152,7 +154,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                ErrorRepository.TryAdd(ex);
+                this.ErrorRepository.TryAdd(ex);
                 return this.Json(new { Response = new { Error = ex.Message } });
             }
 
@@ -191,7 +193,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                     }
 
                     //Grab a repository that matches
-                    IEntityRepository thisRepo = (IEntityRepository)ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(type));
+                    IEntityRepository thisRepo = (IEntityRepository)this.ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(type));
 
                     //If theres no repo for it, dont check again
                     if (thisRepo is null)
@@ -256,7 +258,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             try
             {
-                (t, typeRepository, toSave) = FindOrCreateEntity(TypeString, Id);
+                (t, typeRepository, toSave) = this.FindOrCreateEntity(TypeString, Id);
 
                 using IWriteContext context = typeRepository.WriteContext();
 
@@ -264,7 +266,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                ErrorRepository.TryAdd(ex);
+                this.ErrorRepository.TryAdd(ex);
                 return this.Json(new { Response = new { Error = ex.Message } });
             }
 
@@ -287,7 +289,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 t = TypeFactory.GetType(toSave);
             };
 
-            if (ServiceProvider.GetRepositoryForType(t) is IRepository typeRepository)
+            if (this.ServiceProvider.GetRepositoryForType(t) is IRepository typeRepository)
             {
                 toSave = this.UpdateJsonObject(json, toSave, t);
                 typeRepository.AddOrUpdate(toSave);
@@ -320,7 +322,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             try
             {
-                (t, typeRepository, toSave) = FindOrCreateEntity(type, Id);
+                (t, typeRepository, toSave) = this.FindOrCreateEntity(type, Id);
 
                 using IWriteContext context = typeRepository.WriteContext();
 
@@ -328,7 +330,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                ErrorRepository.TryAdd(ex);
+                this.ErrorRepository.TryAdd(ex);
                 return this.Json(new { Response = new { Error = ex.Message } });
             }
 
@@ -367,7 +369,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 throw new ArgumentNullException(nameof(toSave));
             }
 
-            if (ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t ?? toSave.GetType()) is IKeyedObjectRepository repository)
+            if (this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t ?? toSave.GetType()) is IKeyedObjectRepository repository)
             {
                 if (toSave._Id != 0)
                 {
@@ -522,7 +524,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         {
             Type t = TypeFactory.GetTypeByFullName(TypeString, typeof(Entity));
 
-            IKeyedObjectRepository? typeRepository = ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t);
+            IKeyedObjectRepository? typeRepository = this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t);
 
             if (typeRepository is null)
             {
