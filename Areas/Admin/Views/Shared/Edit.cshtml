@@ -10,53 +10,52 @@
     RenderMeta = this.Helper((IMetaObject toRender) =>
     @<text>
         @{
-        if (!RecursionCheck.Contains(toRender))
-        {
-            RecursionCheck.Push(toRender);
+            if (!RecursionCheck.Contains(toRender))
+            {
+                RecursionCheck.Push(toRender);
+            }
+            else
+            {
+                return;
+            }
+
+            bool isEditable = !(toRender.Property?.AttributeStruct(typeof(DontAllowAttribute), nameof(DontAllowAttribute.Context), DisplayContexts.None).HasFlag(DisplayContexts.Edit) ?? false);
+            bool isVisible = !(toRender.Property?.AttributeStruct(typeof(DontAllowAttribute), nameof(DontAllowAttribute.Context), DisplayContexts.None).HasFlag(DisplayContexts.View) ?? false);
+            if (!isVisible)
+            {
+                RecursionCheck.Pop();
+                return;
+            };
+
+            bool isRoot = toRender.IsRoot();
+            bool isKey = ContextHelper.IsKey(toRender);
+            bool jsonIgnore = toRender.Property?.HasAttribute<JsonIgnoreAttribute>() ?? false;
+            //Technically the top level properties of the batch model arent batch since they represent the edit model data and not the template data
+            bool isBatch = toRender.GetRoot().Is(typeof(BatchEditModelPageModel)) && !toRender.IsRoot() && !toRender.GetParent().Is(typeof(BatchEditModelPageModel));
+
+            Dictionary<string, object> Attributes = new Dictionary<string, object>()
+            {
+                ["propertyname"] = toRender.Property?.Name,
+                ["isroot"] = isRoot,
+                ["coretype"] = toRender.GetCoreType(),
+                ["recursive"] = toRender.IsRecursive(),
+                ["propertytype"] = (toRender.Type ?? toRender.Property.Type).FullName,
+                ["disabled"] = !isEditable || isBatch,
+                ["hidden"] = !isEditable || isKey,
+                ["ignored"] = jsonIgnore || (!isEditable && !isKey) || isBatch,
+                ["isbatch"] = isBatch,
+                ["groupname"] = toRender.Property?.AttributeRef<DisplayAttribute, string>(nameof(DisplayAttribute.GroupName), "")
+
+            };
+
+            if (toRender.GetCoreType() == CoreType.Collection)
+            {
+                Attributes.Add("collectiontype", toRender.Type.CollectionType.FullName);
+            }
+            string DisplayName = toRender?.Property?.AttributeRef<DisplayAttribute, string>(nameof(DisplayAttribute.Name));
+
         }
-        else
-        {
-            return;
-        }
-
-        bool isEditable = !(toRender.Property?.AttributeStruct(typeof(DontAllowAttribute), nameof(DontAllowAttribute.Context), DisplayContexts.None).HasFlag(DisplayContexts.Edit) ?? false);
-        bool isVisible = !(toRender.Property?.AttributeStruct(typeof(DontAllowAttribute), nameof(DontAllowAttribute.Context), DisplayContexts.None).HasFlag(DisplayContexts.View) ?? false);
-        if (!isVisible)
-        {
-            RecursionCheck.Pop();
-            return;
-        };
-
-        bool isRoot = toRender.IsRoot();
-        bool isKey = ContextHelper.IsKey(toRender);
-        bool jsonIgnore = toRender.Property?.HasAttribute<JsonIgnoreAttribute>() ?? false;
-        //Technically the top level properties of the batch model arent batch since they represent the edit model data and not the template data
-        bool isBatch = toRender.GetRoot().Is(typeof(BatchEditModelPageModel)) && !toRender.IsRoot() && !toRender.GetParent().Is(typeof(BatchEditModelPageModel));
-
-        Dictionary<string, object> Attributes = new Dictionary<string, object>()
-        {
-            ["propertyname"] = toRender.Property?.Name,
-            ["isroot"] = isRoot,
-            ["coretype"] = toRender.GetCoreType(),
-            ["recursive"] = toRender.IsRecursive(),
-            ["propertytype"] = (toRender.Type ?? toRender.Property.Type).FullName,
-            ["disabled"] = !isEditable || isBatch,
-            ["hidden"] = !isEditable || isKey,
-            ["ignored"] = jsonIgnore || (!isEditable && !isKey) || isBatch,
-            ["isbatch"] = isBatch,
-            ["groupname"] = toRender.Property?.AttributeRef<DisplayAttribute, string>(nameof(DisplayAttribute.GroupName), "")
-
-        };
-
-        if (toRender.GetCoreType() == CoreType.Collection)
-        {
-            Attributes.Add("collectiontype", toRender.Type.CollectionType.FullName);
-        }
-        string DisplayName = toRender?.Property?.AttributeRef<DisplayAttribute, string>(nameof(DisplayAttribute.Name));
-
-        }
-        <property @
-                  Html.Raw(DynamicEditorService.JoinAttributes(Attributes))>
+        <property @Html.Raw(DynamicEditorService.JoinAttributes(Attributes))>
             <name>
                 @if (isBatch && isEditable)
                 {
@@ -133,7 +132,7 @@
             </value>
         </property>
         @{
-        RecursionCheck.Pop();
+            RecursionCheck.Pop();
         }
     </text>
     );
