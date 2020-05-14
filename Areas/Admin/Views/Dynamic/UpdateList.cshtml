@@ -11,17 +11,17 @@
 @foreach ((string DisplayText, string Url) in new[] {
 ("Edit As Batch", "/Admin/Dynamic/BatchEdit"),
 ("Add Permissions", "/Admin/Dynamic/AddPermissionsGet") })
-    {
-        Guid formGuid = Guid.NewGuid();
+{
+    Guid formGuid = Guid.NewGuid();
 
-<form id="@formGuid" action="@Url" method="post">
-    @for (int i = 0; i < Model.Guids.Count; i++)
-            {
-    @Html.HiddenFor(model => Model.Guids[i])
-            }
-</form>
+    <form id="@formGuid" action="@Url" method="post">
+        @for (int i = 0; i < Model.Guids.Count; i++)
+        {
+            @Html.HiddenFor(model => Model.Guids[i])
+        }
+    </form>
 
-<button onclick="$('#@formGuid').submit()">
-    @DisplayText
-</button>
-    }
+    <button onclick="$('#@formGuid').submit()">
+        @DisplayText
+    </button>
+}

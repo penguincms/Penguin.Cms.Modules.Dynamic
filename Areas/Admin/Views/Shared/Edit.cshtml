@@ -59,13 +59,13 @@
             <name>
                 @if (isBatch && isEditable)
                 {
-                <input type="checkbox" class="toggleProperty" data-ignored="True" />
+                    <input type="checkbox" class="toggleProperty" data-ignored="True" />
                 }
                 @if (!string.IsNullOrWhiteSpace(toRender.Property?.Name))
                 {
-                <span class="propertyName">
-                    @(!string.IsNullOrWhiteSpace(DisplayName) ? DisplayName : toRender.Property?.Name)
-                </span>
+                    <span class="propertyName">
+                        @(!string.IsNullOrWhiteSpace(DisplayName) ? DisplayName : toRender.Property?.Name)
+                    </span>
                 }
             </name>
             <value>
@@ -132,7 +132,7 @@
             </value>
         </property>
         @{
-        RecursionCheck.Pop();
+            RecursionCheck.Pop();
         }
     </text>
     );

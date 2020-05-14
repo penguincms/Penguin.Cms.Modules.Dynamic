@@ -14,10 +14,10 @@
 
     if (RenderingType == HtmlRenderAttribute.RenderingType.textarea)
     {
-    <textarea name="@Model.Property.Name">@Model.Value</textarea>
+        <textarea name="@Model.Property.Name">@Model.Value</textarea>
     }
     else
     {
-    <input name="@Model.Property.Name" type="@RenderingType" value="@Model.Value" autocomplete="off" />
+        <input name="@Model.Property.Name" type="@RenderingType" value="@Model.Value" autocomplete="off" />
     }
 }

@@ -10,6 +10,10 @@ property[data-collectiontype="System.String"] .valuesList i {
     color: #000000;
 }
 
+.enumFlagValue {
+    display: inline-block;
+}
+
 property[data-collectiontype="System.String"] .listValue {
     width: 100%
 }

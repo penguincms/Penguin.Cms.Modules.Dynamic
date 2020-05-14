@@ -31,10 +31,10 @@
 <div class="valuesList">
     @foreach (MetaObject o in Model.CollectionItems)
     {
-    <value class="listValue">
-        @DeleteButton()
-        <partial name="@MatchedPath" model="@o" />
-    </value>
+        <value class="listValue">
+            @DeleteButton()
+            <partial name="@MatchedPath" model="@o" />
+        </value>
     }
 </div>
 <div class="addContainer">

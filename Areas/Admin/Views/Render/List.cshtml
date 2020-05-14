@@ -104,8 +104,23 @@
                                         }
                                         else if (property.Is<Enum>())
                                         {
-                                            //Get Value returns differently for ObjectWrapper and MetaObject and this should probably be fixed
-                                            @(property.Type.Values.FirstOrDefault(v => v.Value == property.GetValue(o).ToString()).La ?? property.Type.Values.FirstOrDefault(v => v.Label == property.GetValue(o).ToString()).Label)
+                                            if (property.Type.HasAttribute<FlagsAttribute>())
+                                            {
+                                                List<string> flagsNames = property.GetFlags(o, out long other).Select(e => e.Label).ToList();
+
+                                                if (other != 0)
+                                                {
+                                                    flagsNames.Add(other.ToString());
+                                                }
+
+                                                @string.Join(" | ", flagsNames);
+
+                                            }
+                                            else
+                                            {
+                                                //Get Value returns differently for ObjectWrapper and MetaObject and this should probably be fixed
+                                                @(property.Type.Values.First(v => v.Value == property.GetValue(o).ToString() || v.Label == property.GetValue(o).ToString()).Label)
+                                            }
                                         }
                                         else if (property.Is<bool>())
                                         {
@@ -141,7 +156,6 @@
                                         }
                                     }
                                 }
-
                             </td>
 
                         }

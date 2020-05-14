@@ -23,7 +23,8 @@
             if (!Model.PostbackParameters.ContainsKey(keys[i]))
             {
                 Model.PostbackParameters.Add(keys[i], Context.Request.Query[keys[i]]);
-            } else
+            }
+            else
             {
                 <text><!-- Postback model already contains parameter @keys[i]  from post when attempt was made to add from query --></text>
             }
@@ -46,7 +47,7 @@
         <input type="hidden" value="@Model.Page" name="page" id="page" />
         @if (Model.Page > 4 && Model.TotalPages > 9)
         {
-        <a href="javascript:;" onclick="updatePage(0)">First</a>
+            <a href="javascript:;" onclick="updatePage(0)">First</a>
         }
 
         @if (Model.TotalPages > 9)
@@ -55,11 +56,11 @@
             {
                 if (i == Model.Page)
                 {
-        <span class="page">@(i + 1)</span>
+                    <span class="page">@(i + 1)</span>
                 }
                 else
                 {
-        <a href="javascript:;" class="page" onclick="updatePage(@i)">@(i + 1)</a>
+                    <a href="javascript:;" class="page" onclick="updatePage(@i)">@(i + 1)</a>
                 }
 
             }
@@ -70,18 +71,18 @@
             {
                 if (i == Model.Page)
                 {
-        <span class="page">@(i + 1)</span>
+                    <span class="page">@(i + 1)</span>
                 }
                 else
                 {
-        <a href="javascript:;" class="page" onclick="updatePage(@i)">@(i + 1)</a>
+                    <a href="javascript:;" class="page" onclick="updatePage(@i)">@(i + 1)</a>
                 }
             }
         }
 
         @if (Model.Page < Model.TotalPages - 4 && Model.TotalPages > 9)
         {
-        <a href="javascript:;" onclick="updatePage(@(Model.TotalPages - 1))">Last</a>
+            <a href="javascript:;" onclick="updatePage(@(Model.TotalPages - 1))">Last</a>
         }
     </div>
 
