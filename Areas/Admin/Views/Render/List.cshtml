@@ -105,7 +105,7 @@
                                         else if (property.Is<Enum>())
                                         {
                                             //Get Value returns differently for ObjectWrapper and MetaObject and this should probably be fixed
-                                            @(property.Type.Values.First(v => v.Value == property.GetValue(o).ToString() || v.Label == property.GetValue(o).ToString()).Label)
+                                            @(property.Type.Values.FirstOrDefault(v => v.Value == property.GetValue(o).ToString()).La ?? property.Type.Values.FirstOrDefault(v => v.Label == property.GetValue(o).ToString()).Label)
                                         }
                                         else if (property.Is<bool>())
                                         {

@@ -22,18 +22,39 @@ using System.Reflection;
 
 namespace Penguin.Cms.Modules.Dynamic.Services
 {
+    /// <summary>
+    /// A service used to find information relevant to rendering MetaObjects dynamically
+    /// </summary>
     public class DynamicEditorService : ISelfRegistering
     {
-        public static ConcurrentDictionary<string, string> Views = new ConcurrentDictionary<string, string>();
+        private static readonly ConcurrentDictionary<string, string?> Views = new ConcurrentDictionary<string, string?>();
+
+        /// <summary>
+        /// The provider used for finding files
+        /// </summary>
         protected IFileProvider FileProvider { get; set; }
 
+        /// <summary>
+        /// Constructs a new instance of the DynamicEditorService using the provided IFileProvider
+        /// </summary>
+        /// <param name="fileProvider">The provider used for finding files</param>
         public DynamicEditorService(IFileProvider fileProvider)
         {
             this.FileProvider = fileProvider;
         }
 
+        /// <summary>
+        /// Joins a string, object dictionary into a string representation (data-{name}="{value}") list for use in html elements}
+        /// </summary>
+        /// <param name="Attributes">The dictionary containing the attributes to generate a string for</param>
+        /// <returns>The HtmlString representation of the provided attributes prefixed with data-</returns>
         public static HtmlString JoinAttributes(Dictionary<string, object> Attributes)
         {
+            if (Attributes is null)
+            {
+                throw new ArgumentNullException(nameof(Attributes));
+            }
+
             string attributeString = " ";
 
             foreach (KeyValuePair<string, object> attribute in Attributes)
@@ -51,7 +72,14 @@ namespace Penguin.Cms.Modules.Dynamic.Services
             return new HtmlString(attributeString);
         }
 
-        public EditorHandlerResult FindHandler(IMetaObject metaObject, DisplayContexts requestContext, IMetaType displayType = null)
+        /// <summary>
+        /// Returns the handler that should be used to render a given MetaObject
+        /// </summary>
+        /// <param name="metaObject">The MetaObject to find a handler for</param>
+        /// <param name="requestContext">The current request context</param>
+        /// <param name="displayType">The type used when finding the handler, if not the MetaObject type</param>
+        /// <returns>A result object that may point to either an action or a view to be used when rendering the object</returns>
+        public EditorHandlerResult FindHandler(IMetaObject metaObject, DisplayContexts requestContext, IMetaType? displayType = null)
         {
             if (metaObject is null)
             {
@@ -70,8 +98,13 @@ namespace Penguin.Cms.Modules.Dynamic.Services
                                                 new DynamicEditorResult() as EditorHandlerResult);
         }
 
-        protected DynamicActionResult GetAction(IMetaObject metaObject, DisplayContexts requestContext, IMetaType displayType = null)
+        protected DynamicActionResult? GetAction(IMetaObject metaObject, DisplayContexts requestContext, IMetaType? displayType = null)
         {
+            if (metaObject is null)
+            {
+                throw new ArgumentNullException(nameof(metaObject));
+            }
+
             displayType ??= metaObject.Type;
 
             foreach (MethodInfo methodInfo in TypeFactory.GetDerivedTypes(typeof(Controller)).SelectMany(m => m.GetMethods()))
@@ -111,8 +144,20 @@ namespace Penguin.Cms.Modules.Dynamic.Services
             return null;
         }
 
-        protected DynamicViewResult GetView(IMetaObject metaObject, DisplayContexts requestContext, IMetaType displayType = null)
+        /// <summary>
+        /// Gets the view result containing editor view information for the current metaObject
+        /// </summary>
+        /// <param name="metaObject">The MetaObject to get view information for</param>
+        /// <param name="requestContext">The current RequestContext</param>
+        /// <param name="displayType">The type to be used when finding the view, if not the MetaObject type</param>
+        /// <returns>A result containing editor view information</returns>
+        protected DynamicViewResult? GetView(IMetaObject metaObject, DisplayContexts requestContext, IMetaType? displayType = null)
         {
+            if (metaObject is null)
+            {
+                throw new ArgumentNullException(nameof(metaObject));
+            }
+
             string BasePath = $"/Areas/Admin/Views/{requestContext}/";
 
             if (metaObject.IsRoot())
@@ -125,7 +170,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
 
             string Key = $"{displayType.AssemblyQualifiedName}+{property?.Name}+{requestContext}";
 
-            if (!Views.TryGetValue(Key, out string path))
+            if (!Views.TryGetValue(Key, out string? path))
             {
                 DynamicRenderer renderer = new DynamicRenderer(new DynamicRendererSettings(displayType, property, this.FileProvider)
                 {

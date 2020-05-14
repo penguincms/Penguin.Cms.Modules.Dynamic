@@ -12,6 +12,7 @@ using Penguin.Persistence.Abstractions;
 using Penguin.Persistence.Repositories.Interfaces;
 using Penguin.Reflection;
 using Penguin.Reflection.Serialization.Abstractions.Interfaces;
+using Penguin.Reflection.Serialization.Abstractions.Wrappers;
 using Penguin.Reflection.Serialization.Constructors;
 using Penguin.Reflection.Serialization.Objects;
 using Penguin.Security.Abstractions.Constants;
@@ -23,7 +24,7 @@ using System.Linq;
 
 namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 {
-    [RequiresRole(RoleNames.LoggedIn)]
+    [RequiresRole(RoleNames.LOGGED_IN)]
     public class ObjectManagementController<T> : AdminController where T : Entity
     {
         //protected AuditEntryRepository AuditEntryRepository { get; set; }
@@ -88,13 +89,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             DynamicListRenderPageModel model = new DynamicListRenderPageModel()
             {
-                PagedList = this.GenerateList<IMetaObject>(listType, count, page, text, (o) =>
-                {
-                    MetaObject x = new MetaObject(o, c);
-
-                    x.Hydrate();
-                    return x;
-                }),
+                PagedList = this.GenerateList<IMetaObject>(listType, count, page, text, (o) => new MetaObjectHolder(o)),
                 Type = type ?? string.Empty
             };
 
@@ -215,7 +210,8 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 EntityViewModel<IMetaObject> model = new EntityViewModel<IMetaObject>(i, this.ComponentService.GetComponents<ViewModule, Entity>(e).ToList());
 
                 return this.View("DynamicEditor", model);
-            } else
+            }
+            else
             {
                 throw new ArgumentNullException(nameof(o));
             }

@@ -4,5 +4,210 @@
         <name>Penguin.Cms.Modules.Dynamic</name>
     </assembly>
     <members>
+        <member name="P:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.ErrorRepository">
+            <summary>
+            A persistence repository used to log errors
+            </summary>
+        </member>
+        <member name="P:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.FileProvider">
+            <summary>
+            An IFileProvider implementation
+            </summary>
+        </member>
+        <member name="P:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.MessageBus">
+            <summary>
+            A message bus instance used to send system messages
+            </summary>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.#ctor(System.IServiceProvider,Microsoft.Extensions.FileProviders.IFileProvider,Penguin.Persistence.Abstractions.Interfaces.IRepository{Penguin.Cms.Errors.AuditableError},Penguin.Messaging.Core.MessageBus)">
+            <summary>
+            A controller used to dynamically edit objects used by the CMS
+            </summary>
+            <param name="serviceProvider">An IServiceProvider implementation</param>
+            <param name="fileProvider">An IFileProvider implementation</param>
+            <param name="errorRepository">A persistence repository used to log errors</param>
+            <param name="messageBus">A message bus instance used to send system messages</param>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.BatchCreate(Penguin.Cms.Modules.Dynamic.Areas.Admin.Models.BatchCreatePageModel)">
+            <summary>
+            Accepts a batch create model and uses the provided information to create new entities with external ids matching those provided
+            </summary>
+            <param name="model">The batch create model containing the Ids</param>
+            <returns>A view containing the result status of the operation</returns>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.BatchCreate(System.String)">
+            <summary>
+            Returns an action result used to enter external ids of new objects to create, of the provided type
+            </summary>
+            <param name="Type">The type of the objects to create using the editor</param>
+            <returns>An action result used to enter external ids of new objects to create, of the provided type</returns>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.BatchEdit(Penguin.Cms.Modules.Dynamic.Areas.Admin.Models.UpdateListPageModel)">
+            <summary>
+            Returns an editor view used to edit multiple objects at once
+            </summary>
+            <param name="items">A page model containing the guids of the items to edit</param>
+            <returns>An editor view used to edit multiple objects at once</returns>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.BatchSave(System.String)">
+            <summary>
+            Updates all entities with guids in the JObject.Guids property using the provided Json
+            </summary>
+            <param name="json">Json string containing the new property values to use when updating the objects</param>
+            <returns>A success state representation, or a redirect</returns>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.GetEntitiesByGuids(System.Collections.Generic.List{System.Guid})">
+            <summary>
+            Returns a list of entities with Guids matching the provided list
+            </summary>
+            <param name="ToFind">The list of Guids of the entities to find</param>
+            <returns>A list of objects containing the entities</returns>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.TryGetId(Newtonsoft.Json.Linq.JObject,System.Int32@)">
+            <summary>
+            Tries to get the _Id property from the provided JObject representing the entity
+            </summary>
+            <param name="tempEntity">The JObject to try and get the _Id property from</param>
+            <param name="Id">The Id int, if found</param>
+            <returns>True if the Id property is found, false if not</returns>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.Save(System.String)">
+            <summary>
+            Action accepting submission of json object along with internal type, used to add or update keyed object or entity
+            </summary>
+            <param name="json">The json representation of the object to save</param>
+            <returns>An action result containing the success state, or a redirect to the posting url</returns>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.SaveJsonObject(System.String,Penguin.Cms.Entities.Entity,System.Type)">
+            <summary>
+            Updates the provided entity using a json string, and saves it to the registered persistence context
+            </summary>
+            <param name="json">The json string containing the new property values</param>
+            <param name="toSave">The target entity</param>
+            <param name="t">An optional type override to use when finding the correct context</param>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.Submit(System.String,System.String)">
+            <summary>
+            Action accepting submission of json object along with internal type, used to add or update keyed object or entity
+            </summary>
+            <param name="json">The json representation of the object to save</param>
+            <param name="type">The object type being saved</param>
+            <returns>An action result containing the success state, or a redirect to the posting url</returns>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateEntityList(System.Collections.IList)">
+            <summary>
+            Refreshes the provided list of entities from the data source, so that they're attached to any persistence context
+            </summary>
+            <param name="list">An ilist of entities to refresh</param>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateJsonObject(System.String,Penguin.Persistence.Abstractions.KeyedObject,System.Type)">
+            <summary>
+            Uses the provided Json to update the given KeyedObject, and saves it in the repository for the type
+            </summary>
+            <param name="json">The json containing the new properties</param>
+            <param name="toSave">The KeyedObject used as a target for the Json Update</param>
+            <param name="t">An optional type used as an override for the requested object type when requesting the repository</param>
+            <returns>An updated version of the object being saved</returns>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateJsonObject(System.String,Penguin.Cms.Entities.Entity,System.Type)">
+            <summary>
+            Uses the provided Json to update the given Entity, and saves it in the repository for the type
+            </summary>
+            <param name="json">The json containing the new properties</param>
+            <param name="toSave">The Entity used as a target for the Json Update</param>
+            <param name="t">An optional type used as an override for the requested object type when requesting the repository</param>
+            <returns>An updated version of the object being saved</returns>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateKeyedObjectList(System.Collections.IList,Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Updates a list of keyed objects using the provided token (JArray?)
+            </summary>
+            <param name="list">The list of objects to update</param>
+            <param name="listJson">The JArray containing the tokens to use when updating the keyed object list</param>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateList">
+            <summary>
+            Accepts a form post of Guids and uses that post to generate an intermediate page for updating a collection of objects
+            </summary>
+            <returns>The view for the intermediate page containing the update types allowed for object collections</returns>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateProperties(System.String,Penguin.Persistence.Abstractions.KeyedObject,System.Type)">
+            <summary>
+            Updates the properties of the given object using the provided json
+            </summary>
+            <param name="json">The json containing the new property values to apply to the target</param>
+            <param name="toSave">The target object to update using the provided json</param>
+            <param name="t">An optional override type to use in place of the target object type</param>
+        </member>
+        <member name="T:Penguin.Cms.Modules.Dynamic.Attributes.DynamicPropertyHandlerAttribute">
+            <summary>
+            An attribute intended for use on controller actions that tells the dynamic system to use the target method 
+            to render the object in the provided display context
+            </summary>
+        </member>
+        <member name="P:Penguin.Cms.Modules.Dynamic.Attributes.DynamicPropertyHandlerAttribute.DisplayContexts">
+            <summary>
+            The display context the action is used in
+            </summary>
+        </member>
+        <member name="P:Penguin.Cms.Modules.Dynamic.Attributes.DynamicPropertyHandlerAttribute.PropertyName">
+            <summary>
+            The name of the property of the meta object that this action is an editor for
+            </summary>
+        </member>
+        <member name="P:Penguin.Cms.Modules.Dynamic.Attributes.DynamicPropertyHandlerAttribute.Type">
+            <summary>
+            The target object type handled by this action
+            </summary>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Attributes.DynamicPropertyHandlerAttribute.#ctor(Penguin.Persistence.Abstractions.Attributes.Control.DisplayContexts,System.Type,System.String)">
+            <summary>
+            Creates a new instance of this attribute
+            </summary>
+            <param name="context">The display context the action is used in</param>
+            <param name="type">The name of the property of the meta object that this action is an editor for</param>
+            <param name="propertyName">The target object type handled by this action</param>
+        </member>
+        <member name="T:Penguin.Cms.Modules.Dynamic.Services.DynamicEditorService">
+            <summary>
+            A service used to find information relevant to rendering MetaObjects dynamically
+            </summary>
+        </member>
+        <member name="P:Penguin.Cms.Modules.Dynamic.Services.DynamicEditorService.FileProvider">
+            <summary>
+            The provider used for finding files
+            </summary>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Services.DynamicEditorService.#ctor(Microsoft.Extensions.FileProviders.IFileProvider)">
+            <summary>
+            Constructs a new instance of the DynamicEditorService using the provided IFileProvider
+            </summary>
+            <param name="fileProvider">The provider used for finding files</param>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Services.DynamicEditorService.JoinAttributes(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Joins a string, object dictionary into a string representation (data-{name}="{value}") list for use in html elements}
+            </summary>
+            <param name="Attributes">The dictionary containing the attributes to generate a string for</param>
+            <returns>The HtmlString representation of the provided attributes prefixed with data-</returns>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Services.DynamicEditorService.FindHandler(Penguin.Reflection.Serialization.Abstractions.Interfaces.IMetaObject,Penguin.Persistence.Abstractions.Attributes.Control.DisplayContexts,Penguin.Reflection.Serialization.Abstractions.Interfaces.IMetaType)">
+            <summary>
+            Returns the handler that should be used to render a given MetaObject
+            </summary>
+            <param name="metaObject">The MetaObject to find a handler for</param>
+            <param name="requestContext">The current request context</param>
+            <param name="displayType">The type used when finding the handler, if not the MetaObject type</param>
+            <returns>A result object that may point to either an action or a view to be used when rendering the object</returns>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Services.DynamicEditorService.GetView(Penguin.Reflection.Serialization.Abstractions.Interfaces.IMetaObject,Penguin.Persistence.Abstractions.Attributes.Control.DisplayContexts,Penguin.Reflection.Serialization.Abstractions.Interfaces.IMetaType)">
+            <summary>
+            Gets the view result containing editor view information for the current metaObject
+            </summary>
+            <param name="metaObject">The MetaObject to get view information for</param>
+            <param name="requestContext">The current RequestContext</param>
+            <param name="displayType">The type to be used when finding the view, if not the MetaObject type</param>
+            <returns>A result containing editor view information</returns>
+        </member>
     </members>
 </doc>

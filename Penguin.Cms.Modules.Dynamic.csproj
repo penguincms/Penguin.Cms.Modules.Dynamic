@@ -14,11 +14,11 @@
   <ItemGroup>
     <Content Remove="wwwroot\**\*" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="3.1.1" />
-    <PackageReference Include="Penguin.Shared.Objects" Version="2.0.2-T9UPDS1" />
-    <PackageReference Include="Penguin.Cms.Errors" Version="1.0.1-T9UPDS1" />
-    <PackageReference Include="Penguin.Cms.Repositories" Version="3.0.4-T9UPDS1" />
-    <PackageReference Include="Penguin.Web.Dynamic" Version="1.0.1-T9UPDS1" />
-    <PackageReference Include="Penguin.Cms.Modules.Admin" Version="1.0.1-T9V819P" />
+    <PackageReference Include="Penguin.Shared.Objects" Version="2.0.2-T9W7B2P" />
+    <PackageReference Include="Penguin.Cms.Errors" Version="1.0.1-T9W7B2P" />
+    <PackageReference Include="Penguin.Cms.Repositories" Version="3.0.4-T9W7B2P" />
+    <PackageReference Include="Penguin.Web.Dynamic" Version="1.0.1-T9W92EU" />
+    <PackageReference Include="Penguin.Cms.Modules.Admin" Version="1.0.1-T9W92EU" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="wwwroot\**\*" />
