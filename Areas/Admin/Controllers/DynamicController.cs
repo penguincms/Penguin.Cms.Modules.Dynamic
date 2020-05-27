@@ -20,6 +20,7 @@ using Penguin.Persistence.Repositories.Interfaces;
 using Penguin.Reflection;
 using Penguin.Reflection.Serialization.Abstractions.Interfaces;
 using Penguin.Reflection.Serialization.Objects;
+using Penguin.Security.Abstractions.Interfaces;
 using Penguin.Web.Dynamic;
 using System;
 using System.Collections;
@@ -36,14 +37,17 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
     public class DynamicController : ObjectManagementController<Entity>
     {
         private const string SUCCESSFUL_SAVE_MESSAGE = "The object was successfully saved";
+
         /// <summary>
         /// A persistence repository used to log errors
         /// </summary>
         protected IRepository<AuditableError> ErrorRepository { get; set; }
+
         /// <summary>
         /// An IFileProvider implementation
         /// </summary>
         protected IFileProvider FileProvider { get; set; }
+
         /// <summary>
         /// A message bus instance used to send system messages
         /// </summary>
@@ -56,7 +60,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         /// <param name="fileProvider">An IFileProvider implementation</param>
         /// <param name="errorRepository">A persistence repository used to log errors</param>
         /// <param name="messageBus">A message bus instance used to send system messages</param>
-        public DynamicController(IServiceProvider serviceProvider, IFileProvider fileProvider, IRepository<AuditableError> errorRepository, MessageBus? messageBus = null) : base(serviceProvider)
+        public DynamicController(IServiceProvider serviceProvider, IFileProvider fileProvider, IRepository<AuditableError> errorRepository, IUserSession userSession, MessageBus? messageBus = null) : base(serviceProvider, userSession)
         {
             this.FileProvider = fileProvider;
             this.MessageBus = messageBus;
@@ -182,7 +186,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 JObject obj = JObject.Parse(json);
                 JToken? jtok = obj[nameof(BatchEditModelPageModel.Template)];
 
-                if(jtok is null)
+                if (jtok is null)
                 {
                     throw new Exception("No template object found on posted json");
                 }
@@ -287,33 +291,6 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         }
 
         /// <summary>
-        /// Tries to get the _Id property from the provided JObject representing the entity
-        /// </summary>
-        /// <param name="tempEntity">The JObject to try and get the _Id property from</param>
-        /// <param name="Id">The Id int, if found</param>
-        /// <returns>True if the Id property is found, false if not</returns>
-        private static bool TryGetId(JObject tempEntity, out int Id)
-        {
-            Id = 0;
-
-            //Should probably be switched to pattern match instead of calling twice
-            if (tempEntity.Properties().Any(p => p.Name == nameof(KeyedObject._Id)))
-            {
-                JToken? property = tempEntity[nameof(KeyedObject._Id)];
-
-                if (property is null)
-                {
-                    throw new Exception("How did we get here?");
-                }
-
-                Id = (int)property;
-                return true;
-            }
-
-
-            return false;
-        }
-        /// <summary>
         /// Action accepting submission of json object along with internal type, used to add or update keyed object or entity
         /// </summary>
         /// <param name="json">The json representation of the object to save</param>
@@ -329,8 +306,8 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             JObject tempEntity = JObject.Parse(json);
 
             string? TypeString = (string?)tempEntity["TypeName"];
-            
-            if(TypeString is null)
+
+            if (TypeString is null)
             {
                 throw new Exception("Unable to find type string on json object");
             }
@@ -405,7 +382,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             JObject tempEntity = JObject.Parse(json);
 
-            if(tempEntity is null)
+            if (tempEntity is null)
             {
                 throw new NullReferenceException("Provided json returned null when parsed as object");
             }
@@ -506,14 +483,6 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             }
         }
 
-        /// <summary>
-        /// Uses the provided Json to update the given Entity, and saves it in the repository for the type
-        /// </summary>
-        /// <param name="json">The json containing the new properties</param>
-        /// <param name="toSave">The Entity used as a target for the Json Update</param>
-        /// <param name="t">An optional type used as an override for the requested object type when requesting the repository</param>
-        /// <returns>An updated version of the object being saved</returns>
-
         public Entity UpdateJsonObject(string json, Entity toSave, Type? t = null)
         {
             JsonSerializerSettings serializerSettings = new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace };
@@ -527,7 +496,13 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             return toSave;
         }
 
-
+        /// <summary>
+        /// Uses the provided Json to update the given Entity, and saves it in the repository for the type
+        /// </summary>
+        /// <param name="json">The json containing the new properties</param>
+        /// <param name="toSave">The Entity used as a target for the Json Update</param>
+        /// <param name="t">An optional type used as an override for the requested object type when requesting the repository</param>
+        /// <returns>An updated version of the object being saved</returns>
         /// <summary>
         /// Updates a list of keyed objects using the provided token (JArray?)
         /// </summary>
@@ -560,7 +535,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                     {
                         string? objectString = listJson[i]?.ToString();
 
-                        if(objectString is null)
+                        if (objectString is null)
                         {
                             throw new NullReferenceException("JArray containing keyed object values contains null entry");
                         }
@@ -588,7 +563,6 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             return this.View(model);
         }
-
 
         /// <summary>
         /// Updates the properties of the given object using the provided json
@@ -662,6 +636,33 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Tries to get the _Id property from the provided JObject representing the entity
+        /// </summary>
+        /// <param name="tempEntity">The JObject to try and get the _Id property from</param>
+        /// <param name="Id">The Id int, if found</param>
+        /// <returns>True if the Id property is found, false if not</returns>
+        private static bool TryGetId(JObject tempEntity, out int Id)
+        {
+            Id = 0;
+
+            //Should probably be switched to pattern match instead of calling twice
+            if (tempEntity.Properties().Any(p => p.Name == nameof(KeyedObject._Id)))
+            {
+                JToken? property = tempEntity[nameof(KeyedObject._Id)];
+
+                if (property is null)
+                {
+                    throw new Exception("How did we get here?");
+                }
+
+                Id = (int)property;
+                return true;
+            }
+
+            return false;
         }
 
         private (Type, IKeyedObjectRepository, Entity) FindOrCreateEntity(string TypeString, int Id)

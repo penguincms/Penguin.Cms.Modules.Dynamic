@@ -19,7 +19,7 @@
             A message bus instance used to send system messages
             </summary>
         </member>
-        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.#ctor(System.IServiceProvider,Microsoft.Extensions.FileProviders.IFileProvider,Penguin.Persistence.Abstractions.Interfaces.IRepository{Penguin.Cms.Errors.AuditableError},Penguin.Messaging.Core.MessageBus)">
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.#ctor(System.IServiceProvider,Microsoft.Extensions.FileProviders.IFileProvider,Penguin.Persistence.Abstractions.Interfaces.IRepository{Penguin.Cms.Errors.AuditableError},Penguin.Security.Abstractions.Interfaces.IUserSession,Penguin.Messaging.Core.MessageBus)">
             <summary>
             A controller used to dynamically edit objects used by the CMS
             </summary>
@@ -63,14 +63,6 @@
             <param name="ToFind">The list of Guids of the entities to find</param>
             <returns>A list of objects containing the entities</returns>
         </member>
-        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.TryGetId(Newtonsoft.Json.Linq.JObject,System.Int32@)">
-            <summary>
-            Tries to get the _Id property from the provided JObject representing the entity
-            </summary>
-            <param name="tempEntity">The JObject to try and get the _Id property from</param>
-            <param name="Id">The Id int, if found</param>
-            <returns>True if the Id property is found, false if not</returns>
-        </member>
         <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.Save(System.String)">
             <summary>
             Action accepting submission of json object along with internal type, used to add or update keyed object or entity
@@ -109,7 +101,7 @@
             <param name="t">An optional type used as an override for the requested object type when requesting the repository</param>
             <returns>An updated version of the object being saved</returns>
         </member>
-        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateJsonObject(System.String,Penguin.Cms.Entities.Entity,System.Type)">
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateKeyedObjectList(System.Collections.IList,Newtonsoft.Json.Linq.JToken)">
             <summary>
             Uses the provided Json to update the given Entity, and saves it in the repository for the type
             </summary>
@@ -117,8 +109,6 @@
             <param name="toSave">The Entity used as a target for the Json Update</param>
             <param name="t">An optional type used as an override for the requested object type when requesting the repository</param>
             <returns>An updated version of the object being saved</returns>
-        </member>
-        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateKeyedObjectList(System.Collections.IList,Newtonsoft.Json.Linq.JToken)">
             <summary>
             Updates a list of keyed objects using the provided token (JArray?)
             </summary>
@@ -138,6 +128,14 @@
             <param name="json">The json containing the new property values to apply to the target</param>
             <param name="toSave">The target object to update using the provided json</param>
             <param name="t">An optional override type to use in place of the target object type</param>
+        </member>
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.TryGetId(Newtonsoft.Json.Linq.JObject,System.Int32@)">
+            <summary>
+            Tries to get the _Id property from the provided JObject representing the entity
+            </summary>
+            <param name="tempEntity">The JObject to try and get the _Id property from</param>
+            <param name="Id">The Id int, if found</param>
+            <returns>True if the Id property is found, false if not</returns>
         </member>
         <member name="T:Penguin.Cms.Modules.Dynamic.Attributes.DynamicPropertyHandlerAttribute">
             <summary>

@@ -16,6 +16,7 @@ using Penguin.Reflection.Serialization.Abstractions.Wrappers;
 using Penguin.Reflection.Serialization.Constructors;
 using Penguin.Reflection.Serialization.Objects;
 using Penguin.Security.Abstractions.Constants;
+using Penguin.Security.Abstractions.Interfaces;
 using Penguin.Web.Security.Attributes;
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
         protected ComponentService ComponentService { get; set; }
 
-        public ObjectManagementController(IServiceProvider serviceProvider) : base(serviceProvider)
+        public ObjectManagementController(IServiceProvider serviceProvider, IUserSession userSession) : base(serviceProvider, userSession)
         {
             this.ComponentService = new ComponentService(serviceProvider);
             //UserSession = userSession;
@@ -203,9 +204,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         {
             if (o is Entity e)
             {
-                MetaObject i = MetaObject.FromConstructor(Constructor.Clone(o));
-
-                i.Hydrate();
+                IMetaObject i = new MetaObjectHolder(o);
 
                 EntityViewModel<IMetaObject> model = new EntityViewModel<IMetaObject>(i, this.ComponentService.GetComponents<ViewModule, Entity>(e).ToList());
 
