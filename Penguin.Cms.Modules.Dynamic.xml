@@ -70,7 +70,7 @@
             <param name="json">The json representation of the object to save</param>
             <returns>An action result containing the success state, or a redirect to the posting url</returns>
         </member>
-        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.SaveJsonObject(System.String,Penguin.Cms.Entities.Entity,System.Type)">
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.SaveJsonObject(System.String,Penguin.Cms.Entities.Entity,Penguin.Cms.Modules.Dynamic.DynamicSaveCache,System.Type)">
             <summary>
             Updates the provided entity using a json string, and saves it to the registered persistence context
             </summary>
@@ -92,7 +92,7 @@
             </summary>
             <param name="list">An ilist of entities to refresh</param>
         </member>
-        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateJsonObject(System.String,Penguin.Persistence.Abstractions.KeyedObject,System.Type)">
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateJsonObject(System.String,Penguin.Persistence.Abstractions.KeyedObject,Penguin.Cms.Modules.Dynamic.DynamicSaveCache,System.Type,Penguin.Persistence.Repositories.Interfaces.IKeyedObjectRepository,Penguin.Persistence.Abstractions.KeyedObject)">
             <summary>
             Uses the provided Json to update the given KeyedObject, and saves it in the repository for the type
             </summary>
@@ -101,27 +101,13 @@
             <param name="t">An optional type used as an override for the requested object type when requesting the repository</param>
             <returns>An updated version of the object being saved</returns>
         </member>
-        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateKeyedObjectList(System.Collections.IList,Newtonsoft.Json.Linq.JToken)">
-            <summary>
-            Uses the provided Json to update the given Entity, and saves it in the repository for the type
-            </summary>
-            <param name="json">The json containing the new properties</param>
-            <param name="toSave">The Entity used as a target for the Json Update</param>
-            <param name="t">An optional type used as an override for the requested object type when requesting the repository</param>
-            <returns>An updated version of the object being saved</returns>
-            <summary>
-            Updates a list of keyed objects using the provided token (JArray?)
-            </summary>
-            <param name="list">The list of objects to update</param>
-            <param name="listJson">The JArray containing the tokens to use when updating the keyed object list</param>
-        </member>
         <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateList">
             <summary>
             Accepts a form post of Guids and uses that post to generate an intermediate page for updating a collection of objects
             </summary>
             <returns>The view for the intermediate page containing the update types allowed for object collections</returns>
         </member>
-        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateProperties(System.String,Penguin.Persistence.Abstractions.KeyedObject,System.Type)">
+        <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateProperties(System.String,Penguin.Persistence.Abstractions.KeyedObject,Penguin.Cms.Modules.Dynamic.DynamicSaveCache,System.Type)">
             <summary>
             Updates the properties of the given object using the provided json
             </summary>

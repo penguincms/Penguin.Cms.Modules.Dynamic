@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using Penguin.Cms.Modules.Dynamic.Extensions;
 using Type = System.Type;
 
 namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
@@ -193,7 +194,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
                 foreach (Entity entity in Entities)
                 {
-                    this.SaveJsonObject(jtok.ToString(), entity);
+                    this.SaveJsonObject(jtok.ToString(), entity, new DynamicSaveCache());
                 }
             }
             catch (Exception ex)
@@ -233,9 +234,9 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 //For each Type
                 foreach (Type type in EntityTypes.ToList())
                 {
-                    //If its not an auditableEntity, keep moving.
+                    //If its not an Entity, keep moving.
                     //This check should be made dynamic to the parameter itself instead of being hardcoded
-                    if (!typeof(AuditableEntity).IsAssignableFrom(type))
+                    if (!typeof(Entity).IsAssignableFrom(type))
                     {
                         EntityTypes.Remove(type);
                         continue;
@@ -295,13 +296,12 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         /// </summary>
         /// <param name="json">The json representation of the object to save</param>
         /// <returns>An action result containing the success state, or a redirect to the posting url</returns>
+        [DisableRequestSizeLimit]
         public ActionResult Save(string json)
         {
             string Referrer = this.Request.Headers["Referer"];
 
-            Entity toSave;
-            IKeyedObjectRepository typeRepository;
-            Type t;
+            Entity toSave = null;
 
             JObject tempEntity = JObject.Parse(json);
 
@@ -319,11 +319,11 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             try
             {
-                (t, typeRepository, toSave) = this.FindOrCreateEntity(TypeString, Id);
+                using DynamicWriteContext context = new DynamicWriteContext(TypeString, Id, this.ServiceProvider);
 
-                using IWriteContext context = typeRepository.WriteContext();
+                this.SaveJsonObject(json, context.Entity, new DynamicSaveCache(), context.EntityType);
 
-                this.SaveJsonObject(json, toSave, t);
+                toSave = context.Entity;
             }
             catch (Exception ex)
             {
@@ -339,7 +339,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             else
             {
                 //ToDo: Move this HTML into a view
-                return this.Json(new { Response = new { Body = $"The object was successfully saved <br /> <a href=\"{Referrer}\">Create Another</a> <br /> <a href=\"/Admin/Edit/{TypeString}/{toSave._Id}\">Make changes to {toSave?.ExternalId ?? "This Entity"}</a> <br />" } });
+                return this.Json(new { Response = new { Body = $"The object was successfully saved <br /> <a href=\"{Referrer}\">Create Another</a> <br /> <a href=\"/Admin/Edit/{TypeString}/{toSave?._Id}\">Make changes to {toSave?.ExternalId ?? "This Entity"}</a> <br />" } });
             }
         }
 
@@ -349,7 +349,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         /// <param name="json">The json string containing the new property values</param>
         /// <param name="toSave">The target entity</param>
         /// <param name="t">An optional type override to use when finding the correct context</param>
-        public void SaveJsonObject(string json, Entity toSave, Type? t = null)
+        public void SaveJsonObject(string json, Entity toSave, DynamicSaveCache cache, Type? t = null)
         {
             if (t is null)
             {
@@ -358,7 +358,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             if (this.ServiceProvider.GetRepositoryForType(t) is IRepository typeRepository)
             {
-                toSave = this.UpdateJsonObject(json, toSave, t);
+                toSave = this.UpdateJsonObject(json, toSave, cache, t);
                 typeRepository.AddOrUpdate(toSave);
             }
             else
@@ -373,10 +373,10 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         /// <param name="json">The json representation of the object to save</param>
         /// <param name="type">The object type being saved</param>
         /// <returns>An action result containing the success state, or a redirect to the posting url</returns>
+        [DisableRequestSizeLimit]
         public ActionResult Submit(string json, string type)
         {
             string Referrer = this.Request.Headers["Referer"];
-            Entity toSave;
             //Cheap hack for redirect. Code proper redirect for new entity
             bool ExistingEntity = false;
 
@@ -389,17 +389,15 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             TryGetId(tempEntity, out int Id);
 
-            Type t;
-
-            IKeyedObjectRepository typeRepository;
+            Entity? toSave = null;
 
             try
             {
-                (t, typeRepository, toSave) = this.FindOrCreateEntity(type, Id);
+                using DynamicWriteContext context = new DynamicWriteContext(type, Id, this.ServiceProvider);
 
-                using IWriteContext context = typeRepository.WriteContext();
+                this.SaveJsonObject(json, context.Entity, new DynamicSaveCache(), context.EntityType);
 
-                this.SaveJsonObject(json, toSave, t);
+                toSave = context.Entity;
             }
             catch (Exception ex)
             {
@@ -415,7 +413,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             else
             {
                 //ToDo: Move this HTML into a view
-                return this.Json(new { Id = toSave._Id, Response = new { Body = $"The object was successfully saved <br /> <a href=\"{Referrer}\">Create Another</a> <br /> <a href=\"/Admin/Edit/{type}/{toSave._Id}\">Make changes to {toSave?.ExternalId ?? "This Entity"}</a> <br />" } });
+                return this.Json(new { Id = toSave?._Id, Response = new { Body = $"The object was successfully saved <br /> <a href=\"{Referrer}\">Create Another</a> <br /> <a href=\"/Admin/Edit/{type}/{toSave?._Id}\">Make changes to {toSave?.ExternalId ?? "This Entity"}</a> <br />" } });
             }
         }
 
@@ -446,7 +444,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         /// <param name="toSave">The KeyedObject used as a target for the Json Update</param>
         /// <param name="t">An optional type used as an override for the requested object type when requesting the repository</param>
         /// <returns>An updated version of the object being saved</returns>
-        public KeyedObject UpdateJsonObject(string json, KeyedObject toSave, Type? t = null)
+        public KeyedObject UpdateJsonObject(string json, KeyedObject toSave, DynamicSaveCache cache, Type? t = null, IKeyedObjectRepository repository = null, KeyedObject repositoryObject = null)
         {
             if (json is null)
             {
@@ -458,22 +456,21 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 throw new ArgumentNullException(nameof(toSave));
             }
 
-            if (this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t ?? toSave.GetType()) is IKeyedObjectRepository repository)
+            repository = repository ?? this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t ?? toSave.GetType()) as IKeyedObjectRepository;
+
+            if (repository != null)
             {
                 if (toSave._Id != 0)
                 {
-                    toSave = repository.Find(toSave._Id);
+                    toSave = repositoryObject ?? repository.Find(toSave._Id);
                 }
 
-                JsonSerializerSettings serializerSettings = new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace };
+                this.UpdateProperties(json, toSave, cache, t);
 
-                serializerSettings.Converters.Add(new LazyLoadForce());
-
-                JsonConvert.PopulateObject(json, toSave, serializerSettings);
-
-                this.UpdateProperties(json, toSave, t);
-
-                repository.Update(toSave);
+                if (toSave._Id == 0)
+                {
+                    repository.Add(toSave);
+                }
 
                 return toSave;
             }
@@ -483,69 +480,11 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             }
         }
 
-        public Entity UpdateJsonObject(string json, Entity toSave, Type? t = null)
+        public Entity UpdateJsonObject(string json, Entity toSave, DynamicSaveCache cache, Type? t = null)
         {
-            JsonSerializerSettings serializerSettings = new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace };
-
-            serializerSettings.Converters.Add(new LazyLoadForce());
-
-            JsonConvert.PopulateObject(json, toSave, serializerSettings);
-
-            this.UpdateProperties(json, toSave, t);
+            this.UpdateProperties(json, toSave, cache, t);
 
             return toSave;
-        }
-
-        /// <summary>
-        /// Uses the provided Json to update the given Entity, and saves it in the repository for the type
-        /// </summary>
-        /// <param name="json">The json containing the new properties</param>
-        /// <param name="toSave">The Entity used as a target for the Json Update</param>
-        /// <param name="t">An optional type used as an override for the requested object type when requesting the repository</param>
-        /// <returns>An updated version of the object being saved</returns>
-        /// <summary>
-        /// Updates a list of keyed objects using the provided token (JArray?)
-        /// </summary>
-        /// <param name="list">The list of objects to update</param>
-        /// <param name="listJson">The JArray containing the tokens to use when updating the keyed object list</param>
-        public void UpdateKeyedObjectList(IList list, JToken listJson)
-        {
-            if (listJson is null)
-            {
-                throw new ArgumentNullException(nameof(listJson));
-            }
-
-            list ??= new List<object>();
-
-            if (list is null)
-            {
-                throw new Exception("What the fuck?");
-            }
-
-            List<KeyedObject> oldObjects = list.Cast<KeyedObject>().ToList();
-
-            list.Clear();
-
-            if (list != null)
-            {
-                int i = 0;
-                foreach (KeyedObject thisObject in oldObjects)
-                {
-                    if (thisObject != null)
-                    {
-                        string? objectString = listJson[i]?.ToString();
-
-                        if (objectString is null)
-                        {
-                            throw new NullReferenceException("JArray containing keyed object values contains null entry");
-                        }
-
-                        KeyedObject newObject = this.UpdateJsonObject(objectString, thisObject);
-                        list.Add(newObject);
-                    }
-                    i++;
-                }
-            }
         }
 
         /// <summary>
@@ -570,7 +509,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         /// <param name="json">The json containing the new property values to apply to the target</param>
         /// <param name="toSave">The target object to update using the provided json</param>
         /// <param name="t">An optional override type to use in place of the target object type</param>
-        public void UpdateProperties(string json, KeyedObject toSave, Type? t = null)
+        public void UpdateProperties(string json, KeyedObject toSave, DynamicSaveCache cache, Type? t = null)
         {
             if (toSave is null)
             {
@@ -584,6 +523,8 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 throw new Exception("What the fuck?");
             }
 
+            JObject jObject = JObject.Parse(json);
+
             foreach (PropertyInfo thisProperty in t.GetProperties())
             {
                 if (thisProperty.GetGetMethod() == null)
@@ -591,51 +532,146 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                     continue;
                 }
 
+                if (thisProperty.PropertyType == typeof(string))
+                {
+                    continue;
+                }
+
                 if (thisProperty.PropertyType.GetInterface("IEnumerable") != null)
                 {
+                    //Create an array of the values we're going to use from the source JSON
+                    JArray sourceArray = jObject.Property(thisProperty).Value as JArray;
+
+                    //Remove the array source from the JSON so we dont "populate" it later, we're managing that now.
+                    //Also, turn that array into a concrete collection so we dont have to do that manually
+                    //Were going to treat it as an IEnumerable because we dont actually know what the implementation is on the target. This is the safes way
+                    IEnumerable<KeyedObject> sourceEnumerable = jObject.Remove<IEnumerable<KeyedObject>>(thisProperty);
+
+                    //Figure out the base type for the target collection
                     Type[] GenericArguments = thisProperty.PropertyType.GetGenericArguments();
 
+                    //No base type? We cant do anything. Move on;
                     if (!GenericArguments.Any())
                     {
                         continue;
                     }
 
+                    //Now we have the collection base type
                     Type listType = GenericArguments[0];
 
-                    if (thisProperty.GetValue(toSave) is IList toUpdate)
+                    //Turn out input json collection into a list
+                    IList tempCollection = sourceEnumerable.ToList();
+
+                    //Create a list to bind to the return object once we've updated everthing
+                    IList newCollection = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(listType));
+
+                    //Grab the collection thats on the object we already have, since it might already have DB instances so we dont have to search
+                    IEnumerable existingCollection = thisProperty.GetValue(toSave) as IEnumerable;
+
+                    //Create a dictionary to hold these existing instances to avoid lookup overhead
+                    Dictionary<int, KeyedObject> ExistingDictionary = new Dictionary<int, KeyedObject>();
+
+                    //If we managed to grab the existing object enumerable
+                    if (!(existingCollection is null))
                     {
-                        if (listType.IsSubclassOf(typeof(Entity)))
+                        //Loop through it
+                        foreach (KeyedObject ko in existingCollection)
                         {
-                            this.UpdateEntityList(toUpdate!);
-                        }
-                        else if (listType.IsSubclassOf(typeof(KeyedObject)))
-                        {
-                            JToken? newValue = JObject.Parse(json)[thisProperty.Name];
-                            if (toUpdate.Count > 0 && newValue != null)
+                            //we cant use null entries
+                            if (ko is null)
                             {
-                                this.UpdateKeyedObjectList(toUpdate, newValue);
+                                continue;
+                            }
+
+                            //And index the values
+                            ExistingDictionary.Add(ko._Id, ko);
+                        }
+                    }
+
+                    if (listType.IsSubclassOf(typeof(Entity)))
+                    {
+                        this.UpdateEntityList(tempCollection!);
+                    }
+                    //If this collection is KeyedObjects
+                    else if (listType.IsSubclassOf(typeof(KeyedObject)))
+                    {
+                        //Grab an instance of the repository we need now, instead of on every iteration
+                        IKeyedObjectRepository repository = this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(listType);
+
+                        //Now loop through the temporary object list from the source json
+                        for (int i = 0; i < tempCollection.Count; i++)
+                        {
+                            //Grab the instance
+                            KeyedObject toPopulate = (KeyedObject)tempCollection[i];
+
+                            //Set up to grab any existing instance
+                            KeyedObject existingObject = null;
+
+                            //If the new json claims the object already exists
+                            if (toPopulate._Id != 0)
+                            {
+                                //We're going to check the object holding the original list to see if it contains that value
+                                //If we cant find it here, UpdateJsonObject will check again.
+                                ExistingDictionary.Remove(toPopulate._Id, out existingObject);
+                            }
+
+                            //We're going to call further down the stack to get an instance attached to the DB and containing all the new values
+                            KeyedObject updatedObject = this.UpdateJsonObject(sourceArray[i].ToString(), (KeyedObject)tempCollection[i], cache, listType, repository, existingObject);
+
+                            //Add that proper instance to the list we're using as our new collection value
+                            newCollection.Add(updatedObject);
+                        }
+
+                        if (!(repository is null))
+                        {
+                            //Now loop through any of the values that werent found in the new list and remove them from the repository.
+                            //Keyed objects are only referenced by one owner so once removed, they have no use.
+                            foreach (KeyValuePair<int, KeyedObject> kvp in ExistingDictionary)
+                            {
+                                KeyedObject toRemove = kvp.Value;
+
+                                repository.Delete(toRemove);
                             }
                         }
                     }
+
+                    //Assign the new collection to the object that was passed in as our target
+                    thisProperty.SetValue(toSave, newCollection);
                 }
-                else if (thisProperty.PropertyType.IsSubclassOf(typeof(AuditableEntity)))
+                else if (typeof(Entity).IsAssignableFrom(thisProperty.PropertyType))
                 {
-                    if (thisProperty.GetValue(toSave) is AuditableEntity thisEntity && this.RetrieveSavedEntity(thisEntity) is AuditableEntity existingValue)
+                    Entity newValue = jObject.Remove<Entity>(thisProperty);
+
+                    if (!(newValue is null))
                     {
-                        thisProperty.SetValue(toSave, existingValue);
+                        Entity cachedEntity = cache.GetObject(newValue);
+
+                        if (cachedEntity is null)
+                        {
+                            newValue = this.RetrieveSavedEntity(newValue);
+                            cache.AddObject(newValue);
+                        }
+                        else
+                        {
+                            newValue = cachedEntity;
+                        }
                     }
+
+                    thisProperty.SetValue(toSave, newValue);
                 }
                 else if (thisProperty.PropertyType.IsSubclassOf(typeof(KeyedObject)))
                 {
                     //Dont fuck with this property if it wasn't sent over by the client!
                     if (JObject.Parse(json)[thisProperty.Name]?.ToString() is string sentProp && thisProperty.GetValue(toSave) is KeyedObject val)
                     {
-                        KeyedObject thisObject = this.UpdateJsonObject(sentProp, val, thisProperty.PropertyType);
+                        KeyedObject thisObject = this.UpdateJsonObject(sentProp, val, cache, thisProperty.PropertyType);
 
                         thisProperty.SetValue(toSave, thisObject);
                     }
                 }
             }
+
+            JsonConvert.PopulateObject(jObject.ToString(), toSave);
         }
 
         /// <summary>
@@ -663,27 +699,6 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             }
 
             return false;
-        }
-
-        private (Type, IKeyedObjectRepository, Entity) FindOrCreateEntity(string TypeString, int Id)
-        {
-            Type t = TypeFactory.GetTypeByFullName(TypeString, typeof(Entity));
-
-            IKeyedObjectRepository? typeRepository = this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t);
-
-            if (typeRepository is null)
-            {
-                throw new Exception($"Typed repository not found for type {t}");
-            }
-
-            if ((Id == 0 ? Activator.CreateInstance(t) : typeRepository.Find(Id)) is Entity entity)
-            {
-                return (t, typeRepository, entity);
-            }
-            else
-            {
-                throw new Exception($"Unable to find or create entity instance of type {t}");
-            }
         }
     }
 }
