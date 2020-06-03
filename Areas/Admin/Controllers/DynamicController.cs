@@ -8,7 +8,7 @@ using Penguin.Cms.Entities;
 using Penguin.Cms.Errors;
 using Penguin.Cms.Errors.Extensions;
 using Penguin.Cms.Modules.Dynamic.Areas.Admin.Models;
-using Penguin.Cms.Modules.Dynamic.Rendering;
+using Penguin.Cms.Modules.Dynamic.Extensions;
 using Penguin.Cms.Repositories.Interfaces;
 using Penguin.Cms.Web.Extensions;
 using Penguin.Extensions.Collections;
@@ -18,7 +18,6 @@ using Penguin.Persistence.Abstractions;
 using Penguin.Persistence.Abstractions.Interfaces;
 using Penguin.Persistence.Repositories.Interfaces;
 using Penguin.Reflection;
-using Penguin.Reflection.Serialization.Abstractions.Interfaces;
 using Penguin.Reflection.Serialization.Objects;
 using Penguin.Security.Abstractions.Interfaces;
 using Penguin.Web.Dynamic;
@@ -28,7 +27,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using Penguin.Cms.Modules.Dynamic.Extensions;
 using Type = System.Type;
 
 namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
@@ -161,7 +159,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 Template = Activator.CreateInstance(commonType)
             };
 
-            IMetaObject model = new MetaObject(BEmodel, Constructor);
+            MetaObject model = new MetaObject(BEmodel, Constructor);
 
             model.Hydrate();
 

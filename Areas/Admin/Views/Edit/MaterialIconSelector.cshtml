@@ -3,7 +3,11 @@
 @using Penguin.Reflection.Serialization.Abstractions.Interfaces;
 
 @{
-    Model.Hydrate();
+    if (Model is MetaObject mo)
+    {
+        mo.Hydrate();
+    }
+
     Layout = null;
     List<string> MaterialIcons = Penguin.Cms.Web.Constants.Strings.MaterialIcons.AllNames;
     Guid iconGuid = Guid.NewGuid();

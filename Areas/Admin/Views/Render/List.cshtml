@@ -80,7 +80,7 @@
                             <td class="list_@property.Name @(property.Attribute<HtmlRenderAttribute>()?.Type)">
 
                                 @{
-                                    o[property].SetParent(o);
+                                    o[property].Parent = o;
                                     EditorHandlerResult result = DynamicEditorService.FindHandler(o[property], DisplayContexts.List);
 
                                     if (result is DynamicActionResult ar)

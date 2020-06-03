@@ -31,7 +31,7 @@
             bool isKey = ContextHelper.IsKey(toRender);
             bool jsonIgnore = toRender.Property?.HasAttribute<JsonIgnoreAttribute>() ?? false;
             //Technically the top level properties of the batch model arent batch since they represent the edit model data and not the template data
-            bool isBatch = toRender.GetRoot().Is(typeof(BatchEditModelPageModel)) && !toRender.IsRoot() && !toRender.GetParent().Is(typeof(BatchEditModelPageModel));
+            bool isBatch = toRender.GetRoot().Is(typeof(BatchEditModelPageModel)) && !toRender.IsRoot() && !toRender.Parent.Is(typeof(BatchEditModelPageModel));
 
             Dictionary<string, object> Attributes = new Dictionary<string, object>()
             {
@@ -76,7 +76,7 @@
                 }
                 @if (isKey)
                 {
-                    if (!isRoot && toRender.GetParent().IsRoot())
+                    if (!isRoot && toRender.Parent.IsRoot())
                     {
                         <input type="hidden" name="@toRender.Property.Name" value="@toRender.Value" />
                     }
@@ -105,7 +105,7 @@
                             {
                                 foreach (IMetaObject thisChild in toRender.CollectionItems)
                                 {
-                                    thisChild.SetParent(toRender);
+                                    thisChild.Parent = toRender;
                                     @RenderMeta(thisChild)
                                 }
                             }
@@ -113,7 +113,7 @@
                             {
                                 foreach (IMetaObject thisChild in toRender.Properties.OrderBy(p => p.Property.AttributeStruct(typeof(DisplayAttribute), nameof(DisplayAttribute.Order), 0)))
                                 {
-                                    thisChild.SetParent(toRender);
+                                    thisChild.Parent = toRender;
                                     @RenderMeta(thisChild)
                                 }
                             }

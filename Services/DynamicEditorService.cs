@@ -113,7 +113,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
                 {
                     if (methodInfo.GetCustomAttribute<DynamicPropertyHandlerAttribute>() is DynamicPropertyHandlerAttribute propertyAttribute && propertyAttribute.DisplayContexts.HasFlag(requestContext))
                     {
-                        if (metaObject.Property.Name == propertyAttribute.PropertyName && metaObject.GetParent().Type.Is(propertyAttribute.Type))
+                        if (metaObject.Property.Name == propertyAttribute.PropertyName && metaObject.Parent.Type.Is(propertyAttribute.Type))
                         {
                             return this.GetActionResult(methodInfo);
                         }
