@@ -659,12 +659,49 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 }
                 else if (thisProperty.PropertyType.IsSubclassOf(typeof(KeyedObject)))
                 {
-                    //Dont fuck with this property if it wasn't sent over by the client!
-                    if (JObject.Parse(json)[thisProperty.Name]?.ToString() is string sentProp && thisProperty.GetValue(toSave) is KeyedObject val)
-                    {
-                        KeyedObject thisObject = this.UpdateJsonObject(sentProp, val, cache, thisProperty.PropertyType);
+                    string jProp = JObject.Parse(json)[thisProperty.Name]?.ToString();
 
-                        thisProperty.SetValue(toSave, thisObject);
+                    //Remove the value attached to the post since we're going to handle it here
+                    jObject.Remove(thisProperty.Name);
+
+                    //Dont fuck with this property if it wasn't sent over by the client!
+                    //Missing string, dont touch.
+                    if (!(jProp is null))
+                    {
+                        //EMPTY string is manually set to null
+                        if (string.IsNullOrWhiteSpace(jProp))
+                        {
+                            KeyedObject existing = thisProperty.GetValue(toSave) as KeyedObject;
+
+                            if (!(existing is null))
+                            {
+                                IKeyedObjectRepository repository = this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(thisProperty.PropertyType);
+
+                                repository.Delete(existing);
+
+                                thisProperty.SetValue(toSave, null);
+                            }
+                        }
+                        //Non empty string needs update
+                        else
+                        {
+                            //Check for existing prop value
+                            KeyedObject val = thisProperty.GetValue(toSave) as KeyedObject;
+
+                            //if existing val is null, try and create a new one so we have something to set
+                            if (val is null)
+                            {
+                                val = JsonConvert.DeserializeObject(jProp, thisProperty.PropertyType) as KeyedObject;
+                            }
+
+                            //If all that works out we're going to add it to the object
+                            if (!(val is null))
+                            {
+                                KeyedObject thisObject = this.UpdateJsonObject(jProp, val, cache, thisProperty.PropertyType);
+
+                                thisProperty.SetValue(toSave, thisObject);
+                            }
+                        }
                     }
                 }
             }
