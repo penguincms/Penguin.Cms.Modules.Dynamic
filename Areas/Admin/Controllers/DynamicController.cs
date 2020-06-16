@@ -8,7 +8,7 @@ using Penguin.Cms.Entities;
 using Penguin.Cms.Errors;
 using Penguin.Cms.Errors.Extensions;
 using Penguin.Cms.Modules.Dynamic.Areas.Admin.Models;
-using Penguin.Cms.Modules.Dynamic.Extensions;
+using Penguin.Json.Extensions;
 using Penguin.Cms.Repositories.Interfaces;
 using Penguin.Cms.Web.Extensions;
 using Penguin.Extensions.Collections;
@@ -564,13 +564,12 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                     IList newCollection = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(listType));
 
                     //Grab the collection thats on the object we already have, since it might already have DB instances so we dont have to search
-                    IEnumerable existingCollection = thisProperty.GetValue(toSave) as IEnumerable;
 
                     //Create a dictionary to hold these existing instances to avoid lookup overhead
                     Dictionary<int, KeyedObject> ExistingDictionary = new Dictionary<int, KeyedObject>();
 
                     //If we managed to grab the existing object enumerable
-                    if (!(existingCollection is null))
+                    if (!(!(thisProperty.GetValue(toSave) is IEnumerable existingCollection)))
                     {
                         //Loop through it
                         foreach (KeyedObject ko in existingCollection)
@@ -671,9 +670,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                         //EMPTY string is manually set to null
                         if (string.IsNullOrWhiteSpace(jProp))
                         {
-                            KeyedObject existing = thisProperty.GetValue(toSave) as KeyedObject;
-
-                            if (!(existing is null))
+                            if (!(!(thisProperty.GetValue(toSave) is KeyedObject existing)))
                             {
                                 IKeyedObjectRepository repository = this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(thisProperty.PropertyType);
 
@@ -686,10 +683,9 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                         else
                         {
                             //Check for existing prop value
-                            KeyedObject val = thisProperty.GetValue(toSave) as KeyedObject;
 
                             //if existing val is null, try and create a new one so we have something to set
-                            if (val is null)
+                            if (!(thisProperty.GetValue(toSave) is KeyedObject val))
                             {
                                 val = JsonConvert.DeserializeObject(jProp, thisProperty.PropertyType) as KeyedObject;
                             }
