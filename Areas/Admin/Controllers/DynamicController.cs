@@ -145,7 +145,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 throw new ArgumentNullException(nameof(items));
             }
 
-            //This will be used to hold the returned entites while we build our return object
+            //This will be used to hold the returned entities while we build our return object
             List<object> Entities = this.GetEntitiesByGuids(items.Guids.Select(s => Guid.Parse(s)).ToList());
 
             //We're gonna use this to determine the eventual return type of the list
