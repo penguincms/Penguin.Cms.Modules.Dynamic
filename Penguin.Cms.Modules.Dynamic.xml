@@ -90,7 +90,7 @@
             <summary>
             Refreshes the provided list of entities from the data source, so that they're attached to any persistence context
             </summary>
-            <param name="list">An ilist of entities to refresh</param>
+            <param name="list">An IList of entities to refresh</param>
         </member>
         <member name="M:Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers.DynamicController.UpdateJsonObject(System.String,Penguin.Persistence.Abstractions.KeyedObject,Penguin.Cms.Modules.Dynamic.DynamicSaveCache,System.Type,Penguin.Persistence.Repositories.Interfaces.IKeyedObjectRepository,Penguin.Persistence.Abstractions.KeyedObject)">
             <summary>

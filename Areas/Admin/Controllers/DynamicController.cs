@@ -216,7 +216,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 throw new ArgumentNullException(nameof(ToFind));
             }
 
-            //This will be used to hold the returned entites while we build our return object
+            //This will be used to hold the returned entities while we build our return object
             List<object> Entities = new List<object>();
 
             //Start with the framework context
@@ -243,19 +243,19 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                     //Grab a repository that matches
                     IEntityRepository thisRepo = (IEntityRepository)this.ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(type));
 
-                    //If theres no repo for it, dont check again
+                    //If there's no repository for it, dont check again
                     if (thisRepo is null)
                     {
                         EntityTypes.Remove(type);
                     }
                     else
                     {
-                        //With this repo, check for every guid
+                        //With this repository, check for every guid
                         foreach (Guid thisGuid in ToFind.ToList())
                         {
                             object ThisEntity = thisRepo.Find(thisGuid);
 
-                            //if no matching entity was found, move on to the next repo.
+                            //if no matching entity was found, move on to the next repository.
                             //This should speed it up since MOST LIKELY all entities will be the same type
                             if (ThisEntity is null)
                             {
@@ -282,7 +282,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                     LastFindCount = ToFind.Count;
                 }
 
-                //We have to loop because of the speed increase caused by the continue. Since we skip repos that dont
+                //We have to loop because of the speed increase caused by the continue. Since we skip repositories that dont
                 //return a the first result, we want to make sure we come back to them later just in case
             } while (ToFind.Any());
 
@@ -418,7 +418,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         /// <summary>
         /// Refreshes the provided list of entities from the data source, so that they're attached to any persistence context
         /// </summary>
-        /// <param name="list">An ilist of entities to refresh</param>
+        /// <param name="list">An IList of entities to refresh</param>
         public void UpdateEntityList(IList list)
         {
             if (list != null)
@@ -454,13 +454,18 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 throw new ArgumentNullException(nameof(toSave));
             }
 
-            repository = repository ?? this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t ?? toSave.GetType()) as IKeyedObjectRepository;
+            if (cache is null)
+            {
+                throw new ArgumentNullException(nameof(cache));
+            }
+
+            repository ??= this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t ?? toSave.GetType());
 
             if (repository != null)
             {
                 if (toSave._Id != 0)
                 {
-                    toSave = repositoryObject ?? repository.Find(toSave._Id);
+                    toSave = repositoryObject ?? repository.Find(toSave._Id) ?? toSave;
                 }
 
                 this.UpdateProperties(json, toSave, cache, t);
@@ -514,6 +519,11 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 throw new ArgumentNullException(nameof(toSave));
             }
 
+            if (cache is null)
+            {
+                throw new ArgumentNullException(nameof(cache));
+            }
+
             t ??= toSave.GetType();
 
             if (t is null)
@@ -560,7 +570,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                     //Turn out input json collection into a list
                     IList tempCollection = sourceEnumerable.ToList();
 
-                    //Create a list to bind to the return object once we've updated everthing
+                    //Create a list to bind to the return object once we've updated everything
                     IList newCollection = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(listType));
 
                     //Grab the collection thats on the object we already have, since it might already have DB instances so we dont have to search
