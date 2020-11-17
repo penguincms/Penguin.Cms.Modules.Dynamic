@@ -205,10 +205,14 @@ var Meta = {
     RootContainer: function (Id) {
         var root = $('#' + Id + ' property[data-isroot="True"]')[0] || $('#' + Id + '[data-isroot="True"]')[0];
 
-        if (root.closest('root')) {
-            return root.closest('root');
+        if (root) {
+            if (root.closest('root')) {
+                return root.closest('root');
+            } else {
+                return root;
+            }
         } else {
-            return root;
+            return $('root')[0];
         }
     },
     GetJson: function (Id) {

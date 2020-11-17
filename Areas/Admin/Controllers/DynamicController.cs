@@ -598,6 +598,11 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                     if (listType.IsSubclassOf(typeof(Entity)))
                     {
                         this.UpdateEntityList(tempCollection!);
+
+                        foreach(object o in tempCollection)
+                        {
+                            newCollection.Add(o);
+                        }
                     }
                     //If this collection is KeyedObjects
                     else if (listType.IsSubclassOf(typeof(KeyedObject)))
