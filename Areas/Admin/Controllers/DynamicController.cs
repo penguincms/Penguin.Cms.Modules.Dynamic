@@ -8,11 +8,11 @@ using Penguin.Cms.Entities;
 using Penguin.Cms.Errors;
 using Penguin.Cms.Errors.Extensions;
 using Penguin.Cms.Modules.Dynamic.Areas.Admin.Models;
-using Penguin.Json.Extensions;
 using Penguin.Cms.Repositories.Interfaces;
 using Penguin.Cms.Web.Extensions;
 using Penguin.Extensions.Collections;
 using Penguin.Extensions.Strings;
+using Penguin.Json.Extensions;
 using Penguin.Messaging.Core;
 using Penguin.Persistence.Abstractions;
 using Penguin.Persistence.Abstractions.Interfaces;
@@ -32,7 +32,6 @@ using Type = System.Type;
 namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 {
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters")]
     public class DynamicController : ObjectManagementController<Entity>
     {
         private const string SUCCESSFUL_SAVE_MESSAGE = "The object was successfully saved";
@@ -599,7 +598,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                     {
                         this.UpdateEntityList(tempCollection!);
 
-                        foreach(object o in tempCollection)
+                        foreach (object o in tempCollection)
                         {
                             newCollection.Add(o);
                         }

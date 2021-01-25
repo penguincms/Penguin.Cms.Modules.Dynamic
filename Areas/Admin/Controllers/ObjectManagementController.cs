@@ -14,7 +14,6 @@ using Penguin.Reflection;
 using Penguin.Reflection.Serialization.Abstractions.Interfaces;
 using Penguin.Reflection.Serialization.Abstractions.Wrappers;
 using Penguin.Reflection.Serialization.Constructors;
-using Penguin.Reflection.Serialization.Objects;
 using Penguin.Security.Abstractions.Constants;
 using Penguin.Security.Abstractions.Interfaces;
 using Penguin.Web.Security.Attributes;
@@ -131,7 +130,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             }
             else // At least we have the guid
             {
-                existingValue = (ltTypeRepository.Find(temporaryEntity.Guid) as Entity);
+                existingValue = ltTypeRepository.Find(temporaryEntity.Guid);
 
                 if (existingValue == null) //No guid hit? Maybe its a child type?
                 {

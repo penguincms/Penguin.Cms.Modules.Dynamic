@@ -4,8 +4,6 @@ using Penguin.Persistence.Abstractions.Interfaces;
 using Penguin.Persistence.Repositories.Interfaces;
 using Penguin.Reflection;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Penguin.Cms.Modules.Dynamic
 {
@@ -20,18 +18,18 @@ namespace Penguin.Cms.Modules.Dynamic
         {
             Type t = TypeFactory.GetTypeByFullName(TypeString, typeof(Entity));
 
-            TypeRepository = serviceProvider.GetRepositoryForType<IKeyedObjectRepository>(t);
+            this.TypeRepository = serviceProvider.GetRepositoryForType<IKeyedObjectRepository>(t);
 
-            if (TypeRepository is null)
+            if (this.TypeRepository is null)
             {
                 throw new Exception($"Typed repository not found for type {t}");
             }
 
-            WriteContext = TypeRepository.WriteContext();
+            this.WriteContext = this.TypeRepository.WriteContext();
 
-            if ((Id == 0 ? Activator.CreateInstance(t) : TypeRepository.Find(Id)) is Entity entity)
+            if ((Id == 0 ? Activator.CreateInstance(t) : this.TypeRepository.Find(Id)) is Entity entity)
             {
-                Entity = entity;
+                this.Entity = entity;
             }
             else
             {
@@ -41,30 +39,30 @@ namespace Penguin.Cms.Modules.Dynamic
 
         #region IDisposable Support
 
-        private bool disposedValue = false; // To detect redundant calls
+        private bool disposedValue; // To detect redundant calls
 
         // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
+            this.Dispose(true);
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!this.disposedValue)
             {
                 if (disposing)
                 {
-                    WriteContext.Dispose();
+                    this.WriteContext.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                 // TODO: set large fields to null.
 
-                disposedValue = true;
+                this.disposedValue = true;
             }
         }
 

@@ -1,8 +1,6 @@
 ﻿using Penguin.Persistence.Abstractions;
-using Penguin.Persistence.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Penguin.Cms.Modules.Dynamic
 {
@@ -17,12 +15,12 @@ namespace Penguin.Cms.Modules.Dynamic
                 throw new ArgumentNullException(nameof(keyedObject));
             }
 
-            Type oType = GetCacheType(keyedObject);
+            Type oType = this.GetCacheType(keyedObject);
 
-            if (!cache.TryGetValue(oType, out Dictionary<int, KeyedObject> store))
+            if (!this.cache.TryGetValue(oType, out Dictionary<int, KeyedObject> store))
             {
                 store = new Dictionary<int, KeyedObject>();
-                cache.Add(oType, store);
+                this.cache.Add(oType, store);
             }
 
             store.Add(keyedObject._Id, keyedObject);
@@ -30,7 +28,7 @@ namespace Penguin.Cms.Modules.Dynamic
 
         public KeyedObject GetObject(int Id, Type type)
         {
-            if (cache.TryGetValue(type, out Dictionary<int, KeyedObject> typeDict) && typeDict.TryGetValue(Id, out KeyedObject o))
+            if (this.cache.TryGetValue(type, out Dictionary<int, KeyedObject> typeDict) && typeDict.TryGetValue(Id, out KeyedObject o))
             {
                 return o;
             }
@@ -47,7 +45,7 @@ namespace Penguin.Cms.Modules.Dynamic
                 throw new ArgumentNullException(nameof(toGet));
             }
 
-            return GetObject(toGet._Id, GetCacheType(toGet)) as T;
+            return this.GetObject(toGet._Id, this.GetCacheType(toGet)) as T;
         }
 
         public void TryAddObject<T>(T keyedObject) where T : KeyedObject
@@ -57,17 +55,17 @@ namespace Penguin.Cms.Modules.Dynamic
                 throw new ArgumentNullException(nameof(keyedObject));
             }
 
-            KeyedObject old = GetObject(keyedObject);
+            KeyedObject old = this.GetObject(keyedObject);
 
             if (old is null)
             {
-                AddObject(keyedObject);
+                this.AddObject(keyedObject);
             }
             else
             {
                 if (old != keyedObject)
                 {
-                    throw new Exception($"Cache already contains object of type {GetCacheType(keyedObject)} with Key {keyedObject._Id} however the version passed in appears to be a different instance");
+                    throw new Exception($"Cache already contains object of type {this.GetCacheType(keyedObject)} with Key {keyedObject._Id} however the version passed in appears to be a different instance");
                 }
             }
         }

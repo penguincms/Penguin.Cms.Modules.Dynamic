@@ -91,10 +91,10 @@ namespace Penguin.Cms.Modules.Dynamic.Services
                 return new DynamicEditorResult();
             }
 
-            return this.GetAction(metaObject, requestContext, displayType) as EditorHandlerResult ??
-                   this.GetView(metaObject, requestContext, displayType) as EditorHandlerResult ??
+            return this.GetAction(metaObject, requestContext, displayType) ??
+                   this.GetView(metaObject, requestContext, displayType) ??
                    (metaObject.GetCoreType() == CoreType.Value ?
-                                                new StaticValueResult() as EditorHandlerResult :
+                                                new StaticValueResult() :
                                                 new DynamicEditorResult() as EditorHandlerResult);
         }
 

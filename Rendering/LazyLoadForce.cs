@@ -15,7 +15,7 @@ namespace Penguin.Cms.Modules.Dynamic.Rendering
             return objectType.IsCollection();
         }
 
-        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters")]
+
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             if (reader is null)
