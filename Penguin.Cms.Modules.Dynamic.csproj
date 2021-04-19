@@ -19,7 +19,7 @@
     <PackageReference Include="Penguin.Cms.Repositories" Version="5.0.2-TACVG7B" />
     <PackageReference Include="Penguin.Web.Dynamic" Version="5.0.2-TACVG7B" />
     <PackageReference Include="Penguin.Cms.Modules.Admin" Version="5.0.2-TACVG7B" />
-    <PackageReference Include="Penguin.Json" Version="5.0.2-TACVG7B" />
+    <PackageReference Include="Penguin.Json" Version="5.0.2-TADPPXL" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="wwwroot\**\*" />
