@@ -198,7 +198,6 @@ namespace Penguin.Cms.Modules.Dynamic.Services
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "<Pending>")]
         private DynamicActionResult GetActionResult(MethodInfo methodInfo)
         {
             Dictionary<string, object> routeData = new Dictionary<string, object>

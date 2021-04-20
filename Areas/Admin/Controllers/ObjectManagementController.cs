@@ -39,7 +39,6 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             //AuditEntryRepository = auditEntryRepository;
         }
 
-        [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
         public virtual ActionResult Edit(int? id, string? type = null)
         {
             System.Type t = type is null ? typeof(T) : TypeFactory.GetTypeByFullName(type);
@@ -156,7 +155,6 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             return existingValue ?? temporaryEntity;
         }
 
-        [SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "<Pending>")]
         public ActionResult Search(string type, string term, int limit = 10)
         {
             List<Type> typesToSearch = TypeFactory.GetDerivedTypes(TypeFactory.GetTypeByFullName(type)).ToList();

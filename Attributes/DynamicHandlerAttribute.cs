@@ -11,7 +11,7 @@ namespace Penguin.Cms.Modules.Dynamic.Attributes
 
         public DynamicHandlerAttribute(DisplayContexts context, params Type[] toHandle)
         {
-            if (toHandle.Length == 0)
+            if (toHandle is null || toHandle.Length == 0)
             {
                 throw new ArgumentException("Must specify at least one type to handle", nameof(toHandle));
             }
