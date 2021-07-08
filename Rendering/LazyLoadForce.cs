@@ -4,7 +4,6 @@ using Penguin.Reflection.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Penguin.Cms.Modules.Dynamic.Rendering
 {
@@ -14,7 +13,6 @@ namespace Penguin.Cms.Modules.Dynamic.Rendering
         {
             return objectType.IsCollection();
         }
-
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {

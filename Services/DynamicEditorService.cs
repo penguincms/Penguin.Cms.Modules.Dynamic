@@ -91,14 +91,14 @@ namespace Penguin.Cms.Modules.Dynamic.Services
                 return new DynamicEditorResult();
             }
 
-            return this.GetAction(metaObject, requestContext, displayType) ??
+            return GetAction(metaObject, requestContext, displayType) ??
                    this.GetView(metaObject, requestContext, displayType) ??
                    (metaObject.GetCoreType() == CoreType.Value ?
                                                 new StaticValueResult() :
                                                 new DynamicEditorResult() as EditorHandlerResult);
         }
 
-        protected DynamicActionResult? GetAction(IMetaObject metaObject, DisplayContexts requestContext, IMetaType? displayType = null)
+        protected static DynamicActionResult? GetAction(IMetaObject metaObject, DisplayContexts requestContext, IMetaType? displayType = null)
         {
             if (metaObject is null)
             {
@@ -115,7 +115,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
                     {
                         if (metaObject.Property.Name == propertyAttribute.PropertyName && metaObject.Parent.Type.Is(propertyAttribute.Type))
                         {
-                            return this.GetActionResult(methodInfo);
+                            return GetActionResult(methodInfo);
                         }
                     }
                 }
@@ -124,7 +124,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
                 {
                     if (attribute.ToHandle.FirstOrDefault(t => displayType.Is(t)) is Type handledType)
                     {
-                        return this.GetActionResult(methodInfo);
+                        return GetActionResult(methodInfo);
                     }
                 }
             }
@@ -166,7 +166,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
             }
 
             IMetaProperty property = metaObject.Property;
-            displayType ??= this.GetDisplayType(metaObject);
+            displayType ??= GetDisplayType(metaObject);
 
             string Key = $"{displayType.AssemblyQualifiedName}+{property?.Name}+{requestContext}";
 
@@ -198,13 +198,19 @@ namespace Penguin.Cms.Modules.Dynamic.Services
             }
         }
 
-        private DynamicActionResult GetActionResult(MethodInfo methodInfo)
+        private static DynamicActionResult GetActionResult(MethodInfo methodInfo)
         {
+            if (methodInfo is null)
+            {
+                throw new ArgumentNullException(nameof(methodInfo));
+            }
+
             Dictionary<string, object> routeData = new Dictionary<string, object>
                         {
                             { "controller", methodInfo.ReflectedType.Name.Replace("Controller", "") },
                             { "action", methodInfo.Name }
                         };
+
             string area = string.Empty;
 
             if (methodInfo.ReflectedType.GetCustomAttribute<AreaAttribute>() is AreaAttribute areaA)
@@ -217,7 +223,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
             return new DynamicActionResult(routeData);
         }
 
-        private IMetaType GetDisplayType(IMetaObject metaObject)
+        private static IMetaType GetDisplayType(IMetaObject metaObject)
         {
             if (metaObject.Property.HasAttribute<DisplayTypeAttribute>())
             {

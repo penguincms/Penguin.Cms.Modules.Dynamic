@@ -31,7 +31,7 @@ using Type = System.Type;
 
 namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 {
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
+    
     public class DynamicController : ObjectManagementController<Entity>
     {
         private const string SUCCESSFUL_SAVE_MESSAGE = "The object was successfully saved";

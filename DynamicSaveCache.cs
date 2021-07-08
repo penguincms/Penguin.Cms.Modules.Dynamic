@@ -15,7 +15,7 @@ namespace Penguin.Cms.Modules.Dynamic
                 throw new ArgumentNullException(nameof(keyedObject));
             }
 
-            Type oType = this.GetCacheType(keyedObject);
+            Type oType = GetCacheType(keyedObject);
 
             if (!this.cache.TryGetValue(oType, out Dictionary<int, KeyedObject> store))
             {
@@ -45,7 +45,7 @@ namespace Penguin.Cms.Modules.Dynamic
                 throw new ArgumentNullException(nameof(toGet));
             }
 
-            return this.GetObject(toGet._Id, this.GetCacheType(toGet)) as T;
+            return this.GetObject(toGet._Id, GetCacheType(toGet)) as T;
         }
 
         public void TryAddObject<T>(T keyedObject) where T : KeyedObject
@@ -65,13 +65,18 @@ namespace Penguin.Cms.Modules.Dynamic
             {
                 if (old != keyedObject)
                 {
-                    throw new Exception($"Cache already contains object of type {this.GetCacheType(keyedObject)} with Key {keyedObject._Id} however the version passed in appears to be a different instance");
+                    throw new Exception($"Cache already contains object of type {GetCacheType(keyedObject)} with Key {keyedObject._Id} however the version passed in appears to be a different instance");
                 }
             }
         }
 
-        private Type GetCacheType(KeyedObject toCheck)
+        private static Type GetCacheType(KeyedObject toCheck)
         {
+            if (toCheck is null)
+            {
+                throw new ArgumentNullException(nameof(toCheck));
+            }
+
             Type toReturn = toCheck.GetType();
 
             while (toReturn.Name.StartsWith(toReturn.BaseType.Name + "_"))

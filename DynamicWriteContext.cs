@@ -45,9 +45,9 @@ namespace Penguin.Cms.Modules.Dynamic
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            this.Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
+            this.Dispose(true);// TODO: uncomment the following line if the finalizer is overridden above.
+            
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
