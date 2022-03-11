@@ -125,7 +125,7 @@
         </member>
         <member name="T:Penguin.Cms.Modules.Dynamic.Attributes.DynamicPropertyHandlerAttribute">
             <summary>
-            An attribute intended for use on controller actions that tells the dynamic system to use the target method 
+            An attribute intended for use on controller actions that tells the dynamic system to use the target method
             to render the object in the provided display context
             </summary>
         </member>

@@ -24,14 +24,12 @@ using Penguin.Web.Dynamic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Type = System.Type;
 
 namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 {
-    
     public class DynamicController : ObjectManagementController<Entity>
     {
         private const string SUCCESSFUL_SAVE_MESSAGE = "The object was successfully saved";
@@ -117,6 +115,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             {
                 this.AddMessage("Existing Items: " + string.Join(", ", Existing));
             }
+
             return this.RedirectToAction(nameof(List), new { type = model.Type });
         }
 
@@ -126,10 +125,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         /// <param name="Type">The type of the objects to create using the editor</param>
         /// <returns>An action result used to enter external ids of new objects to create, of the provided type</returns>
         [HttpGet]
-        public virtual ActionResult BatchCreate(string Type)
-        {
-            return this.View(new BatchCreatePageModel() { Type = Type });
-        }
+        public virtual ActionResult BatchCreate(string Type) => this.View(new BatchCreatePageModel() { Type = Type });
 
         /// <summary>
         /// Returns an editor view used to edit multiple objects at once
@@ -351,7 +347,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             if (t is null)
             {
                 t = TypeFactory.GetType(toSave);
-            };
+            }
 
             if (this.ServiceProvider.GetRepositoryForType(t) is IRepository typeRepository)
             {

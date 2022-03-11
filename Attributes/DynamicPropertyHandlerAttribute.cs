@@ -4,7 +4,7 @@ using System;
 namespace Penguin.Cms.Modules.Dynamic.Attributes
 {
     /// <summary>
-    /// An attribute intended for use on controller actions that tells the dynamic system to use the target method 
+    /// An attribute intended for use on controller actions that tells the dynamic system to use the target method
     /// to render the object in the provided display context
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
@@ -14,6 +14,7 @@ namespace Penguin.Cms.Modules.Dynamic.Attributes
         /// The display context the action is used in
         /// </summary>
         public DisplayContexts DisplayContexts { get; set; }
+
         /// <summary>
         /// The name of the property of the meta object that this action is an editor for
         /// </summary>
