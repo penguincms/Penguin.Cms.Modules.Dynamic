@@ -5,9 +5,6 @@ namespace Penguin.Cms.Modules.Dynamic.Controllers
 {
     public class RenderController : Controller
     {
-        public ActionResult AsCSV(IMetaObject model)
-        {
-            return this.View(model);
-        }
+        public ActionResult AsCSV(IMetaObject model) => this.View(model);
     }
 }
