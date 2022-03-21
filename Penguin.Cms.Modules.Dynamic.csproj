@@ -20,6 +20,7 @@
     <PackageReference Include="Penguin.Cms.Modules.Admin" Version="5.0.6-TATDFB4" />
     <PackageReference Include="Penguin.Json" Version="5.0.6-TATDFB4" />
     <PackageReference Include="Penguin.Shared.Objects" Version="5.0.6-TATDFB4" />
+    <PackageReference Include="Penguin.Shared.Objects" Version="5.0.6-TAKUDQX" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="wwwroot\**\*" />
