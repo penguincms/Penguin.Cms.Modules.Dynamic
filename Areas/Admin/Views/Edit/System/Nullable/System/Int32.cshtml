@@ -1,0 +1,23 @@
+﻿@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Reflection.Serialization.Extensions;
+
+@model IMetaObject
+
+@{
+    Layout = null;
+
+    Int32 Value = Model.GetValue<Int32>();
+    Int32 Min = Model?.Property.MinValue<Int32>() ?? Int32.MinValue;
+    Int32 Max = Model?.Property.MaxValue<Int32>() ?? Int32.MaxValue;
+
+    if (Value < Min)
+    {
+        Value = Min;
+    }
+    else if (Value > Max)
+    {
+        Value = Max;
+    }
+}
+
+<input name="@Model.Property.Name" type="number" value="@Value" max="@Max" min="@Min" step="1" placeholder="@nameof(Int32)" />

@@ -1,0 +1,10 @@
+﻿@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Reflection.Serialization.Extensions;
+
+@model IMetaObject
+
+@{
+    Layout = null;
+}
+
+<input name="@Model.Property.Name" type="number" value="@(Model.GetValue<Double>())" max="@Decimal.MaxValue" min="@Decimal.MinValue" step="any" placeholder="@nameof(Decimal)" />

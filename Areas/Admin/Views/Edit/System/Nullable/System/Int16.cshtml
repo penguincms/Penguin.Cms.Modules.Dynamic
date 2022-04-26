@@ -1,0 +1,10 @@
+﻿@using Penguin.Reflection.Serialization.Objects;
+@using Penguin.Reflection.Serialization.Extensions;
+
+@model IMetaObject
+
+@{
+    Layout = null;
+}
+
+<input name="@Model.Property.Name" type="number" value="@(Model.GetValue<Int16>())" max="@Int16.MaxValue" min="@Int16.MinValue" step="1" placeholder="@nameof(Int16)" />

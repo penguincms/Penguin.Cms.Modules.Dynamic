@@ -103,10 +103,13 @@
                         {
                             if (toRender.GetCoreType() == CoreType.Collection)
                             {
-                                foreach (IMetaObject thisChild in toRender.CollectionItems)
+                                if (toRender.CollectionItems != null)
                                 {
-                                    thisChild.Parent = toRender;
+                                    foreach (IMetaObject thisChild in toRender.CollectionItems)
+                                    {
+                                        thisChild.Parent = toRender;
                                     @RenderMeta(thisChild)
+                                    }
                                 }
                             }
                             else if (toRender.GetCoreType() == CoreType.Reference)

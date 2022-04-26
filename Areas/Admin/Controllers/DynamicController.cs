@@ -543,107 +543,118 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 if (thisProperty.PropertyType.GetInterface("IEnumerable") != null)
                 {
                     //Create an array of the values we're going to use from the source JSON
-                    JArray sourceArray = jObject.Property(thisProperty).Value as JArray;
+                    JArray sourceArray = jObject.Property(thisProperty)?.Value as JArray;
+
+                    if(sourceArray is null)
+                    {
+                        continue;
+                    }
 
                     //Remove the array source from the JSON so we dont "populate" it later, we're managing that now.
                     //Also, turn that array into a concrete collection so we dont have to do that manually
                     //Were going to treat it as an IEnumerable because we dont actually know what the implementation is on the target. This is the safes way
                     IEnumerable<KeyedObject> sourceEnumerable = jObject.Remove<IEnumerable<KeyedObject>>(thisProperty);
 
-                    //Figure out the base type for the target collection
-                    Type[] GenericArguments = thisProperty.PropertyType.GetGenericArguments();
-
-                    //No base type? We cant do anything. Move on;
-                    if (!GenericArguments.Any())
+                    if (sourceEnumerable != null)
                     {
-                        continue;
-                    }
 
-                    //Now we have the collection base type
-                    Type listType = GenericArguments[0];
+                        //Figure out the base type for the target collection
+                        Type[] GenericArguments = thisProperty.PropertyType.GetGenericArguments();
 
-                    //Turn out input json collection into a list
-                    IList tempCollection = sourceEnumerable.ToList();
-
-                    //Create a list to bind to the return object once we've updated everything
-                    IList newCollection = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(listType));
-
-                    //Grab the collection thats on the object we already have, since it might already have DB instances so we dont have to search
-
-                    //Create a dictionary to hold these existing instances to avoid lookup overhead
-                    Dictionary<int, KeyedObject> ExistingDictionary = new Dictionary<int, KeyedObject>();
-
-                    //If we managed to grab the existing object enumerable
-                    if (!(!(thisProperty.GetValue(toSave) is IEnumerable existingCollection)))
-                    {
-                        //Loop through it
-                        foreach (KeyedObject ko in existingCollection)
+                        //No base type? We cant do anything. Move on;
+                        if (!GenericArguments.Any())
                         {
-                            //we cant use null entries
-                            if (ko is null)
-                            {
-                                continue;
-                            }
-
-                            //And index the values
-                            ExistingDictionary.Add(ko._Id, ko);
-                        }
-                    }
-
-                    if (listType.IsSubclassOf(typeof(Entity)))
-                    {
-                        this.UpdateEntityList(tempCollection!);
-
-                        foreach (object o in tempCollection)
-                        {
-                            newCollection.Add(o);
-                        }
-                    }
-                    //If this collection is KeyedObjects
-                    else if (listType.IsSubclassOf(typeof(KeyedObject)))
-                    {
-                        //Grab an instance of the repository we need now, instead of on every iteration
-                        IKeyedObjectRepository repository = this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(listType);
-
-                        //Now loop through the temporary object list from the source json
-                        for (int i = 0; i < tempCollection.Count; i++)
-                        {
-                            //Grab the instance
-                            KeyedObject toPopulate = (KeyedObject)tempCollection[i];
-
-                            //Set up to grab any existing instance
-                            KeyedObject existingObject = null;
-
-                            //If the new json claims the object already exists
-                            if (toPopulate._Id != 0)
-                            {
-                                //We're going to check the object holding the original list to see if it contains that value
-                                //If we cant find it here, UpdateJsonObject will check again.
-                                ExistingDictionary.Remove(toPopulate._Id, out existingObject);
-                            }
-
-                            //We're going to call further down the stack to get an instance attached to the DB and containing all the new values
-                            KeyedObject updatedObject = this.UpdateJsonObject(sourceArray[i].ToString(), (KeyedObject)tempCollection[i], cache, listType, repository, existingObject);
-
-                            //Add that proper instance to the list we're using as our new collection value
-                            newCollection.Add(updatedObject);
+                            continue;
                         }
 
-                        if (!(repository is null))
-                        {
-                            //Now loop through any of the values that werent found in the new list and remove them from the repository.
-                            //Keyed objects are only referenced by one owner so once removed, they have no use.
-                            foreach (KeyValuePair<int, KeyedObject> kvp in ExistingDictionary)
-                            {
-                                KeyedObject toRemove = kvp.Value;
+                        //Now we have the collection base type
+                        Type listType = GenericArguments[0];
 
-                                repository.Delete(toRemove);
+
+
+                        //Turn out input json collection into a list
+                        IList tempCollection = sourceEnumerable.ToList();
+
+                        //Create a list to bind to the return object once we've updated everything
+                        IList newCollection = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(listType));
+
+                        //Grab the collection thats on the object we already have, since it might already have DB instances so we dont have to search
+
+                        //Create a dictionary to hold these existing instances to avoid lookup overhead
+                        Dictionary<int, KeyedObject> ExistingDictionary = new Dictionary<int, KeyedObject>();
+
+                        //If we managed to grab the existing object enumerable
+                        if (!(!(thisProperty.GetValue(toSave) is IEnumerable existingCollection)))
+                        {
+                            //Loop through it
+                            foreach (KeyedObject ko in existingCollection)
+                            {
+                                //we cant use null entries
+                                if (ko is null)
+                                {
+                                    continue;
+                                }
+
+                                //And index the values
+                                ExistingDictionary.Add(ko._Id, ko);
                             }
                         }
-                    }
 
-                    //Assign the new collection to the object that was passed in as our target
-                    thisProperty.SetValue(toSave, newCollection);
+                        if (listType.IsSubclassOf(typeof(Entity)))
+                        {
+                            this.UpdateEntityList(tempCollection!);
+
+                            foreach (object o in tempCollection)
+                            {
+                                newCollection.Add(o);
+                            }
+                        }
+                        //If this collection is KeyedObjects
+                        else if (listType.IsSubclassOf(typeof(KeyedObject)))
+                        {
+                            //Grab an instance of the repository we need now, instead of on every iteration
+                            IKeyedObjectRepository repository = this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(listType);
+
+                            //Now loop through the temporary object list from the source json
+                            for (int i = 0; i < tempCollection.Count; i++)
+                            {
+                                //Grab the instance
+                                KeyedObject toPopulate = (KeyedObject)tempCollection[i];
+
+                                //Set up to grab any existing instance
+                                KeyedObject existingObject = null;
+
+                                //If the new json claims the object already exists
+                                if (toPopulate._Id != 0)
+                                {
+                                    //We're going to check the object holding the original list to see if it contains that value
+                                    //If we cant find it here, UpdateJsonObject will check again.
+                                    ExistingDictionary.Remove(toPopulate._Id, out existingObject);
+                                }
+
+                                //We're going to call further down the stack to get an instance attached to the DB and containing all the new values
+                                KeyedObject updatedObject = this.UpdateJsonObject(sourceArray[i].ToString(), (KeyedObject)tempCollection[i], cache, listType, repository, existingObject);
+
+                                //Add that proper instance to the list we're using as our new collection value
+                                newCollection.Add(updatedObject);
+                            }
+
+                            if (!(repository is null))
+                            {
+                                //Now loop through any of the values that werent found in the new list and remove them from the repository.
+                                //Keyed objects are only referenced by one owner so once removed, they have no use.
+                                foreach (KeyValuePair<int, KeyedObject> kvp in ExistingDictionary)
+                                {
+                                    KeyedObject toRemove = kvp.Value;
+
+                                    repository.Delete(toRemove);
+                                }
+                            }
+                        }
+
+                        //Assign the new collection to the object that was passed in as our target
+                        thisProperty.SetValue(toSave, newCollection);
+                    }
                 }
                 else if (typeof(Entity).IsAssignableFrom(thisProperty.PropertyType))
                 {

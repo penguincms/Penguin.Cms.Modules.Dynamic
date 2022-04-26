@@ -1,0 +1,55 @@
+﻿@model IMetaObject
+
+@using Penguin.Reflection.Serialization.Abstractions.Objects;
+@using Penguin.Reflection.Serialization.Extensions;
+@using Penguin.Reflection.Extensions;
+
+@{
+    string id = Guid.NewGuid().ToString().Replace("-", "");
+}
+
+@if (Model.Type.HasAttribute<FlagsAttribute>())
+{
+    long l = Model.Value.Convert<long>();
+
+    <input name="@Model.Property.Name" value="@Model.Value" />
+    <div id="@id">
+        @foreach (EnumValue thisValue in Model.Type.Values)
+        {
+            long thisVal = thisValue.Value.Convert<long>();
+            <div class="enumFlagValue">
+
+                <label for="@thisValue.Label">@thisValue.Label</label>
+                <input type="checkbox" name="@thisValue.Label" value="@thisVal" @Html.Raw(Penguin.Reflection.Serialization.Extensions.IMetaPropertyExtensions.TestFlags(l, thisVal) ? "checked" : "") data-ignored="True" />
+            </div>
+        }
+    </div>
+}
+else
+{
+    <select name="@Model.Property.Name">
+        @foreach (EnumValue thisValue in Model.Type.Values)
+        {
+            <!option value="@thisValue.Value" @Html.Attribute("selected", thisValue.Value == Model.Value)>@thisValue.Label</!option>
+        }
+    </select>
+}
+
+<script>
+    $("#@id input[type='checkbox']").change(
+        function (i) {
+            var chki = $(i.target).closest('value').find('> input');
+            var e = chki.val();
+
+            var iv = $(i.target).val();
+
+            if (i.target.checked) {
+                e = e | iv;
+            } else {
+                e = e & ~iv;
+            }
+
+            chki.val(e);
+        }
+    );
+</script>
