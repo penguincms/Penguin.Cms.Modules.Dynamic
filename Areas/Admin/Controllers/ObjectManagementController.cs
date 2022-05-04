@@ -124,7 +124,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             //Maybe we have the ID
             if (temporaryEntity._Id != 0)
             {
-                existingValue = (ltTypeRepository.Find(temporaryEntity._Id) as Entity);
+                existingValue = ltTypeRepository.Find(temporaryEntity._Id) as Entity;
             }
             else // At least we have the guid
             {

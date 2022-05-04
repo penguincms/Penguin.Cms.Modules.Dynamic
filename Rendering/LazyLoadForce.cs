@@ -9,7 +9,10 @@ namespace Penguin.Cms.Modules.Dynamic.Rendering
 {
     public class LazyLoadForce : JsonConverter
     {
-        public override bool CanConvert(Type objectType) => objectType.IsCollection();
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType.IsCollection();
+        }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
@@ -51,6 +54,9 @@ namespace Penguin.Cms.Modules.Dynamic.Rendering
             }
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) => throw new System.NotImplementedException();
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

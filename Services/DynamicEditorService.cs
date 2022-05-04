@@ -6,7 +6,7 @@ using Penguin.Cms.Modules.Dynamic.Attributes;
 using Penguin.Cms.Modules.Dynamic.Rendering;
 using Penguin.Cms.Web.Extensions;
 using Penguin.DependencyInjection.Abstractions.Interfaces;
-using Penguin.Extensions.Strings;
+using Penguin.Extensions.String;
 using Penguin.Persistence.Abstractions.Attributes.Control;
 using Penguin.Reflection;
 using Penguin.Reflection.Abstractions;
@@ -179,12 +179,12 @@ namespace Penguin.Cms.Modules.Dynamic.Services
 
                 if (renderer.IsDynamic)
                 {
-                    Views.TryAdd(Key, null);
+                    _ = Views.TryAdd(Key, null);
                 }
                 else
                 {
                     path = renderer.MatchedPath;
-                    Views.TryAdd(Key, path);
+                    _ = Views.TryAdd(Key, path);
                 }
             }
 
