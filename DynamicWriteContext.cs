@@ -10,8 +10,11 @@ namespace Penguin.Cms.Modules.Dynamic
     public class DynamicWriteContext : IDisposable
     {
         public Entity Entity { get; set; }
+
         public Type EntityType { get; set; }
+
         public IKeyedObjectRepository TypeRepository { get; set; }
+
         private IWriteContext WriteContext { get; set; }
 
         public DynamicWriteContext(string TypeString, int Id, IServiceProvider serviceProvider)

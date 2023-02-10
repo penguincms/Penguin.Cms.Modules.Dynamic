@@ -5,6 +5,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Models
     public class DynamicListModel<T>
     {
         public List<string> HiddenColumns { get; } = new List<string>();
+
         public IEnumerable<T> List { get; set; }
 
         public DynamicListModel(IEnumerable<T> toDisplay)

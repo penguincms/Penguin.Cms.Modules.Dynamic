@@ -7,6 +7,7 @@ namespace Penguin.Cms.Modules.Dynamic.Attributes
     public sealed class DynamicHandlerAttribute : Attribute
     {
         public DisplayContexts DisplayContexts { get; set; }
+
         public Type[] ToHandle { get; internal set; }
 
         public DynamicHandlerAttribute(DisplayContexts context, params Type[] toHandle)
