@@ -33,7 +33,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
         public ObjectManagementController(IServiceProvider serviceProvider, IUserSession userSession) : base(serviceProvider, userSession)
         {
-            this.ComponentService = new ComponentService(serviceProvider);
+            ComponentService = new ComponentService(serviceProvider);
             //UserSession = userSession;
             //AuditEntryRepository = auditEntryRepository;
         }
@@ -42,41 +42,14 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         {
             System.Type t = type is null ? typeof(T) : TypeFactory.GetTypeByFullName(type);
 
-            object? toEdit;
-
-            if (id.HasValue)
-            {
-                if (t.IsSubclassOf(typeof(KeyedObject)))
-                {
-                    toEdit = this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t)?.Find(id.Value);
-                }
-                else
-                {
-                    throw new Exception("Support for editing objects that are not derived from KeyedObject is not available in this version");
-                    //DbContext targetContext = ContextHelper.GetContextForType(t);
-
-                    //System.Reflection.PropertyInfo Key = ContextHelper.GetKeyForType(t);
-
-                    //DbSet targetSet = targetContext.Set(t);
-
-                    //Task<List<object>> results = targetSet.SqlQuery($"select * from [{targetContext.GetTableName(t)}] where {Key.Name} = {_id.Value}").ToListAsync();
-
-                    //results.Wait();
-
-                    //toEdit = results.Result.Single();
-                }
-            }
-            else
-            {
-                toEdit = Activator.CreateInstance(t);
-            }
-
-            if (toEdit is null)
-            {
-                throw new NullReferenceException($"Unable to find or instantiate object of type {t} with key {id}");
-            }
-
-            return this.Edit(toEdit);
+            object? toEdit = id.HasValue
+                ? t.IsSubclassOf(typeof(KeyedObject))
+                    ? (object?)(ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t)?.Find(id.Value))
+                    : throw new Exception("Support for editing objects that are not derived from KeyedObject is not available in this version")
+                : Activator.CreateInstance(t);
+            return toEdit is null
+                ? throw new NullReferenceException($"Unable to find or instantiate object of type {t} with key {id}")
+                : Edit(toEdit);
         }
 
         public virtual ActionResult List(string type, int count = 20, int page = 0, string text = "")
@@ -85,28 +58,28 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             MetaConstructor c = Constructor;
 
-            DynamicListRenderPageModel model = new DynamicListRenderPageModel()
+            DynamicListRenderPageModel model = new()
             {
-                PagedList = this.GenerateList<IMetaObject>(listType, count, page, text, (o) => new MetaObjectHolder(o)),
+                PagedList = GenerateList<IMetaObject>(listType, count, page, text, (o) => new MetaObjectHolder(o)),
                 Type = type ?? string.Empty
             };
 
-            return this.View(model);
+            return View(model);
         }
 
-        public override void OnActionExecuting(ActionExecutingContext filterContext)
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (filterContext is null)
+            if (context is null)
             {
-                throw new ArgumentNullException(nameof(filterContext));
+                throw new ArgumentNullException(nameof(context));
             }
 
-            if (!filterContext.RouteData.Values.ContainsKey("KnownController"))
+            if (!context.RouteData.Values.ContainsKey("KnownController"))
             {
-                filterContext.RouteData.Values.Add("KnownController", "True");
+                context.RouteData.Values.Add("KnownController", "True");
             }
 
-            base.OnActionExecuting(filterContext);
+            base.OnActionExecuting(context);
         }
 
         public Entity? RetrieveSavedEntity(Entity temporaryEntity)
@@ -118,7 +91,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             Type lt = TypeFactory.GetTypeByFullName(temporaryEntity.TypeName, typeof(Entity));
 
-            IEntityRepository ltTypeRepository = (IEntityRepository)this.ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(lt));
+            IEntityRepository ltTypeRepository = (IEntityRepository)ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(lt));
 
             Entity? existingValue;
             //Maybe we have the ID
@@ -136,7 +109,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
                     foreach (Type t in toSearch)
                     {
-                        ltTypeRepository = (IEntityRepository)this.ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(t));
+                        ltTypeRepository = (IEntityRepository)ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(t));
 
                         if (ltTypeRepository.IsValid)
                         {
@@ -162,13 +135,13 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             typesToSearch = typesToSearch.Distinct().ToList();
 
-            List<Entity> results = new List<Entity>();
+            List<Entity> results = new();
 
             foreach (Type t in typesToSearch)
             {
                 if (results.Count < limit)
                 {
-                    IEntityRepository? TypedRepository = (IEntityRepository)this.ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(t));
+                    IEntityRepository? TypedRepository = (IEntityRepository)ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(t));
 
                     if (TypedRepository != null && TypedRepository.IsValid)
                     {
@@ -179,21 +152,14 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 }
             }
 
-            if (results.Count > limit)
-            {
-                results = results.Take(limit).ToList();
-            }
-            else
-            {
-                results = results.ToList();
-            }
+            results = results.Count > limit ? results.Take(limit).ToList() : results.ToList();
 
             string s = JsonConvert.SerializeObject(results, Formatting.None, new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
 
-            return this.Content(s);
+            return Content(s);
         }
 
         protected virtual ActionResult Edit(object o)
@@ -202,9 +168,9 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             {
                 IMetaObject i = new MetaObjectHolder(o);
 
-                EntityViewModel<IMetaObject> model = new EntityViewModel<IMetaObject>(i, this.ComponentService.GetComponents<ViewModule, Entity>(e).ToList());
+                EntityViewModel<IMetaObject> model = new(i, ComponentService.GetComponents<ViewModule, Entity>(e).ToList());
 
-                return this.View("DynamicEditor", model);
+                return View("DynamicEditor", model);
             }
             else
             {

@@ -6,7 +6,7 @@ namespace Penguin.Cms.Modules.Dynamic
 {
     public class DynamicSaveCache
     {
-        private readonly Dictionary<Type, Dictionary<int, KeyedObject>> cache = new Dictionary<Type, Dictionary<int, KeyedObject>>();
+        private readonly Dictionary<Type, Dictionary<int, KeyedObject>> cache = new();
 
         public void AddObject<T>(T keyedObject) where T : KeyedObject
         {
@@ -17,35 +17,23 @@ namespace Penguin.Cms.Modules.Dynamic
 
             Type oType = GetCacheType(keyedObject);
 
-            if (!this.cache.TryGetValue(oType, out Dictionary<int, KeyedObject> store))
+            if (!cache.TryGetValue(oType, out Dictionary<int, KeyedObject> store))
             {
                 store = new Dictionary<int, KeyedObject>();
-                this.cache.Add(oType, store);
+                cache.Add(oType, store);
             }
 
             store.Add(keyedObject._Id, keyedObject);
         }
 
-        public KeyedObject GetObject(int Id, Type type)
+        public KeyedObject? GetObject(int Id, Type type)
         {
-            if (this.cache.TryGetValue(type, out Dictionary<int, KeyedObject> typeDict) && typeDict.TryGetValue(Id, out KeyedObject o))
-            {
-                return o;
-            }
-            else
-            {
-                return null;
-            }
+            return cache.TryGetValue(type, out Dictionary<int, KeyedObject> typeDict) && typeDict.TryGetValue(Id, out KeyedObject o) ? o : null;
         }
 
-        public T GetObject<T>(T toGet) where T : KeyedObject
+        public T? GetObject<T>(T toGet) where T : KeyedObject
         {
-            if (toGet is null)
-            {
-                throw new ArgumentNullException(nameof(toGet));
-            }
-
-            return this.GetObject(toGet._Id, GetCacheType(toGet)) as T;
+            return toGet is null ? throw new ArgumentNullException(nameof(toGet)) : GetObject(toGet._Id, GetCacheType(toGet)) as T;
         }
 
         public void TryAddObject<T>(T keyedObject) where T : KeyedObject
@@ -55,11 +43,11 @@ namespace Penguin.Cms.Modules.Dynamic
                 throw new ArgumentNullException(nameof(keyedObject));
             }
 
-            KeyedObject old = this.GetObject(keyedObject);
+            KeyedObject old = GetObject(keyedObject);
 
             if (old is null)
             {
-                this.AddObject(keyedObject);
+                AddObject(keyedObject);
             }
             else
             {

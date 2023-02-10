@@ -4,10 +4,10 @@ using System;
 namespace Penguin.Cms.Modules.Dynamic.Attributes
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public class DynamicHandlerAttribute : Attribute
+    public sealed class DynamicHandlerAttribute : Attribute
     {
         public DisplayContexts DisplayContexts { get; set; }
-        public Type[] ToHandle { get; set; }
+        public Type[] ToHandle { get; internal set; }
 
         public DynamicHandlerAttribute(DisplayContexts context, params Type[] toHandle)
         {
@@ -16,9 +16,11 @@ namespace Penguin.Cms.Modules.Dynamic.Attributes
                 throw new ArgumentException("Must specify at least one type to handle", nameof(toHandle));
             }
 
-            this.DisplayContexts = context;
+            DisplayContexts = context;
 
-            this.ToHandle = toHandle;
+            ToHandle = toHandle;
         }
+
+        public DisplayContexts Context { get; }
     }
 }

@@ -7,7 +7,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
     {
         public ActionResult MaterialIconSelector(IMetaObject model)
         {
-            return this.View(model);
+            return View(model);
         }
     }
 }

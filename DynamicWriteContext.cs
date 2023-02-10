@@ -18,23 +18,18 @@ namespace Penguin.Cms.Modules.Dynamic
         {
             Type t = TypeFactory.GetTypeByFullName(TypeString, typeof(Entity));
 
-            this.TypeRepository = serviceProvider.GetRepositoryForType<IKeyedObjectRepository>(t);
+            TypeRepository = serviceProvider.GetRepositoryForType<IKeyedObjectRepository>(t);
 
-            if (this.TypeRepository is null)
+            if (TypeRepository is null)
             {
                 throw new Exception($"Typed repository not found for type {t}");
             }
 
-            this.WriteContext = this.TypeRepository.WriteContext();
+            WriteContext = TypeRepository.WriteContext();
 
-            if ((Id == 0 ? Activator.CreateInstance(t) : this.TypeRepository.Find(Id)) is Entity entity)
-            {
-                this.Entity = entity;
-            }
-            else
-            {
-                throw new Exception($"Unable to find or create entity instance of type {t}");
-            }
+            Entity = (Id == 0 ? Activator.CreateInstance(t) : TypeRepository.Find(Id)) is Entity entity
+                ? entity
+                : throw new Exception($"Unable to find or create entity instance of type {t}");
         }
 
         #region IDisposable Support
@@ -45,24 +40,24 @@ namespace Penguin.Cms.Modules.Dynamic
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            this.Dispose(true);// TODO: uncomment the following line if the finalizer is overridden above.
+            Dispose(true);// TODO: uncomment the following line if the finalizer is overridden above.
 
             GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!this.disposedValue)
+            if (!disposedValue)
             {
                 if (disposing)
                 {
-                    this.WriteContext.Dispose();
+                    WriteContext.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                 // TODO: set large fields to null.
 
-                this.disposedValue = true;
+                disposedValue = true;
             }
         }
 

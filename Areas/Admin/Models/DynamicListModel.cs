@@ -9,13 +9,13 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Models
 
         public DynamicListModel(IEnumerable<T> toDisplay)
         {
-            this.List = toDisplay;
+            List = toDisplay;
         }
 
         public DynamicListModel(IEnumerable<T> toDisplay, List<string> hiddenColumns)
         {
-            this.HiddenColumns = hiddenColumns;
-            this.List = toDisplay;
+            HiddenColumns = hiddenColumns;
+            List = toDisplay;
         }
     }
 }

@@ -58,9 +58,9 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         /// <param name="messageBus">A message bus instance used to send system messages</param>
         public DynamicController(IServiceProvider serviceProvider, IFileProvider fileProvider, IRepository<AuditableError> errorRepository, IUserSession userSession, MessageBus? messageBus = null) : base(serviceProvider, userSession)
         {
-            this.FileProvider = fileProvider;
-            this.MessageBus = messageBus;
-            this.ErrorRepository = errorRepository;
+            FileProvider = fileProvider;
+            MessageBus = messageBus;
+            ErrorRepository = errorRepository;
         }
 
         /// <summary>
@@ -79,11 +79,11 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             Type type = TypeFactory.GetTypeByFullName(model.Type, typeof(Entity), false);
 
             string Message = string.Empty;
-            List<string> Existing = new List<string>();
+            List<string> Existing = new();
 
             try
             {
-                IEntityRepository thisRepo = (IEntityRepository)this.ServiceProvider.GetService(typeof(IRepository<>).MakeGenericType(type));
+                IEntityRepository thisRepo = (IEntityRepository)ServiceProvider.GetService(typeof(IRepository<>).MakeGenericType(type));
 
                 using IWriteContext context = thisRepo.WriteContext();
                 foreach (string thisExternalId in model.ExternalIds.TrimLines())
@@ -105,10 +105,10 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                _ = this.ErrorRepository.TryAdd(ex);
+                _ = ErrorRepository.TryAdd(ex);
 
                 this.AddMessage(ex.Message);
-                return this.View(model);
+                return View(model);
             }
 
             if (Existing.Any())
@@ -116,7 +116,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 this.AddMessage("Existing Items: " + string.Join(", ", Existing));
             }
 
-            return this.RedirectToAction(nameof(List), new { type = model.Type });
+            return RedirectToAction(nameof(List), new { type = model.Type });
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         [HttpGet]
         public virtual ActionResult BatchCreate(string Type)
         {
-            return this.View(new BatchCreatePageModel() { Type = Type });
+            return View(new BatchCreatePageModel() { Type = Type });
         }
 
         /// <summary>
@@ -144,24 +144,24 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             }
 
             //This will be used to hold the returned entities while we build our return object
-            List<object> Entities = this.GetEntitiesByGuids(items.Guids.Select(s => Guid.Parse(s)).ToList());
+            List<object> Entities = GetEntitiesByGuids(items.Guids.Select(Guid.Parse).ToList());
 
             //We're gonna use this to determine the eventual return type of the list
             Type commonType = Entities.GetCommonType();
 
-            DynamicRenderer renderer = new DynamicRenderer(new DynamicRendererSettings(commonType, this.FileProvider) { ExactOnly = true });
+            DynamicRenderer renderer = new(new DynamicRendererSettings(commonType, FileProvider) { ExactOnly = true });
 
-            BatchEditModelPageModel BEmodel = new BatchEditModelPageModel
+            BatchEditModelPageModel BEmodel = new()
             {
                 Guids = items.Guids,
                 Template = Activator.CreateInstance(commonType)
             };
 
-            MetaObject model = new MetaObject(BEmodel, Constructor);
+            MetaObject model = new(BEmodel, Constructor);
 
             model.Hydrate();
 
-            return this.View(model);
+            return View(model);
         }
 
         /// <summary>
@@ -175,8 +175,8 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             try
             {
-                using IWriteContext context = this.ServiceProvider.GetService<IPersistenceContext>().WriteContext();
-                List<object> Entities = this.GetEntitiesByGuids(JsonConvert.DeserializeObject<BatchEditModelPageModel>(json).Guids.Select(g => Guid.Parse(g)).ToList());
+                using IWriteContext context = ServiceProvider.GetService<IPersistenceContext>().WriteContext();
+                List<object> Entities = GetEntitiesByGuids(JsonConvert.DeserializeObject<BatchEditModelPageModel>(json).Guids.Select(Guid.Parse).ToList());
 
                 commonType = Entities.GetCommonType();
 
@@ -190,16 +190,16 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
                 foreach (Entity entity in Entities)
                 {
-                    this.SaveJsonObject(jtok.ToString(), entity, new DynamicSaveCache());
+                    SaveJsonObject(jtok.ToString(), entity, new DynamicSaveCache());
                 }
             }
             catch (Exception ex)
             {
-                _ = this.ErrorRepository.TryAdd(ex);
-                return this.Json(new { Response = new { Error = ex.Message } });
+                _ = ErrorRepository.TryAdd(ex);
+                return Json(new { Response = new { Error = ex.Message } });
             }
 
-            return this.Json(new { Response = new { Redirect = $"/Admin/List/{commonType?.FullName}" } });
+            return Json(new { Response = new { Redirect = $"/Admin/List/{commonType?.FullName}" } });
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             }
 
             //This will be used to hold the returned entities while we build our return object
-            List<object> Entities = new List<object>();
+            List<object> Entities = new();
 
             //Start with the framework context
             //DynamicContext thisContext = ServiceProvider.GetService<DynamicContext>();
@@ -239,7 +239,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                     }
 
                     //Grab a repository that matches
-                    IEntityRepository thisRepo = (IEntityRepository)this.ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(type));
+                    IEntityRepository thisRepo = (IEntityRepository)ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(type));
 
                     //If there's no repository for it, dont check again
                     if (thisRepo is null)
@@ -295,9 +295,9 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         [DisableRequestSizeLimit]
         public ActionResult Save(string json)
         {
-            string Referrer = this.Request.Headers["Referer"];
+            string Referrer = Request.Headers["Referer"];
 
-            Entity toSave = null;
+            Entity? toSave = null;
 
             JObject tempEntity = JObject.Parse(json);
 
@@ -315,27 +315,27 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             try
             {
-                using DynamicWriteContext context = new DynamicWriteContext(TypeString, Id, this.ServiceProvider);
+                using DynamicWriteContext context = new(TypeString, Id, ServiceProvider);
 
-                this.SaveJsonObject(json, context.Entity, new DynamicSaveCache(), context.EntityType);
+                SaveJsonObject(json, context.Entity, new DynamicSaveCache(), context.EntityType);
 
                 toSave = context.Entity;
             }
             catch (Exception ex)
             {
-                _ = this.ErrorRepository.TryAdd(ex);
-                return this.Json(new { Response = new { Error = ex.Message } });
+                _ = ErrorRepository.TryAdd(ex);
+                return Json(new { Response = new { Error = ex.Message } });
             }
 
             if (ExistingEntity)
             {
                 this.AddMessage(SUCCESSFUL_SAVE_MESSAGE);
-                return this.Json(new { Response = new { Redirect = Referrer } });
+                return Json(new { Response = new { Redirect = Referrer } });
             }
             else
             {
                 //ToDo: Move this HTML into a view
-                return this.Json(new { Response = new { Body = $"The object was successfully saved <br /> <a href=\"{Referrer}\">Create Another</a> <br /> <a href=\"/Admin/Edit/{TypeString}/{toSave?._Id}\">Make changes to {toSave?.ExternalId ?? "This Entity"}</a> <br />" } });
+                return Json(new { Response = new { Body = $"The object was successfully saved <br /> <a href=\"{Referrer}\">Create Another</a> <br /> <a href=\"/Admin/Edit/{TypeString}/{toSave?._Id}\">Make changes to {toSave?.ExternalId ?? "This Entity"}</a> <br />" } });
             }
         }
 
@@ -347,14 +347,11 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         /// <param name="t">An optional type override to use when finding the correct context</param>
         public void SaveJsonObject(string json, Entity toSave, DynamicSaveCache cache, Type? t = null)
         {
-            if (t is null)
-            {
-                t = TypeFactory.GetType(toSave);
-            }
+            t ??= TypeFactory.GetType(toSave);
 
-            if (this.ServiceProvider.GetRepositoryForType(t) is IRepository typeRepository)
+            if (ServiceProvider.GetRepositoryForType(t) is IRepository typeRepository)
             {
-                toSave = this.UpdateJsonObject(json, toSave, cache, t);
+                toSave = UpdateJsonObject(json, toSave, cache, t);
                 typeRepository.AddOrUpdate(toSave);
             }
             else
@@ -372,7 +369,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         [DisableRequestSizeLimit]
         public ActionResult Submit(string json, string type)
         {
-            string Referrer = this.Request.Headers["Referer"];
+            string Referrer = Request.Headers["Referer"];
             //Cheap hack for redirect. Code proper redirect for new entity
             bool ExistingEntity = false;
 
@@ -389,27 +386,27 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
             try
             {
-                using DynamicWriteContext context = new DynamicWriteContext(type, Id, this.ServiceProvider);
+                using DynamicWriteContext context = new(type, Id, ServiceProvider);
 
-                this.SaveJsonObject(json, context.Entity, new DynamicSaveCache(), context.EntityType);
+                SaveJsonObject(json, context.Entity, new DynamicSaveCache(), context.EntityType);
 
                 toSave = context.Entity;
             }
             catch (Exception ex)
             {
-                _ = this.ErrorRepository.TryAdd(ex);
-                return this.Json(new { Response = new { Error = ex.Message } });
+                _ = ErrorRepository.TryAdd(ex);
+                return Json(new { Response = new { Error = ex.Message } });
             }
 
             if (ExistingEntity)
             {
                 this.AddMessage(SUCCESSFUL_SAVE_MESSAGE);
-                return this.Json(new { Response = new { Redirect = Referrer } });
+                return Json(new { Response = new { Redirect = Referrer } });
             }
             else
             {
                 //ToDo: Move this HTML into a view
-                return this.Json(new { Id = toSave?._Id, Response = new { Body = $"The object was successfully saved <br /> <a href=\"{Referrer}\">Create Another</a> <br /> <a href=\"/Admin/Edit/{type}/{toSave?._Id}\">Make changes to {toSave?.ExternalId ?? "This Entity"}</a> <br />" } });
+                return Json(new { Id = toSave?._Id, Response = new { Body = $"The object was successfully saved <br /> <a href=\"{Referrer}\">Create Another</a> <br /> <a href=\"/Admin/Edit/{type}/{toSave?._Id}\">Make changes to {toSave?.ExternalId ?? "This Entity"}</a> <br />" } });
             }
         }
 
@@ -423,7 +420,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             {
                 foreach (Entity thisEntity in list.Cast<Entity>().ToList())
                 {
-                    if (thisEntity != null && this.RetrieveSavedEntity(thisEntity) is Entity refreshed)
+                    if (thisEntity != null && RetrieveSavedEntity(thisEntity) is Entity refreshed)
                     {
                         _ = list.Add(refreshed);
                     }
@@ -440,7 +437,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         /// <param name="toSave">The KeyedObject used as a target for the Json Update</param>
         /// <param name="t">An optional type used as an override for the requested object type when requesting the repository</param>
         /// <returns>An updated version of the object being saved</returns>
-        public KeyedObject UpdateJsonObject(string json, KeyedObject toSave, DynamicSaveCache cache, Type? t = null, IKeyedObjectRepository? repository = null, KeyedObject repositoryObject = null)
+        public KeyedObject UpdateJsonObject(string json, KeyedObject toSave, DynamicSaveCache cache, Type? t = null, IKeyedObjectRepository? repository = null, KeyedObject? repositoryObject = null)
         {
             if (json is null)
             {
@@ -457,7 +454,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 throw new ArgumentNullException(nameof(cache));
             }
 
-            repository ??= this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t ?? toSave.GetType());
+            repository ??= ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(t ?? toSave.GetType());
 
             if (repository != null)
             {
@@ -466,7 +463,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                     toSave = repositoryObject ?? repository.Find(toSave._Id) ?? toSave;
                 }
 
-                this.UpdateProperties(json, toSave, cache, t);
+                UpdateProperties(json, toSave, cache, t);
 
                 if (toSave._Id == 0)
                 {
@@ -483,7 +480,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
         public Entity UpdateJsonObject(string json, Entity toSave, DynamicSaveCache cache, Type? t = null)
         {
-            this.UpdateProperties(json, toSave, cache, t);
+            UpdateProperties(json, toSave, cache, t);
 
             return toSave;
         }
@@ -494,14 +491,14 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         /// <returns>The view for the intermediate page containing the update types allowed for object collections</returns>
         public virtual ActionResult UpdateList()
         {
-            UpdateListPageModel model = new UpdateListPageModel();
+            UpdateListPageModel model = new();
 
-            foreach (string key in this.Request.Form.Keys.Where(s => Guid.TryParse(s, out Guid _)))
+            foreach (string key in Request.Form.Keys.Where(s => Guid.TryParse(s, out Guid _)))
             {
                 model.Guids.Add(key);
             }
 
-            return this.View(model);
+            return View(model);
         }
 
         /// <summary>
@@ -546,9 +543,8 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 if (thisProperty.PropertyType.GetInterface("IEnumerable") != null)
                 {
                     //Create an array of the values we're going to use from the source JSON
-                    JArray sourceArray = jObject.Property(thisProperty)?.Value as JArray;
 
-                    if (sourceArray is null)
+                    if (jObject.Property(thisProperty)?.Value is not JArray sourceArray)
                     {
                         continue;
                     }
@@ -560,7 +556,6 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
                     if (sourceEnumerable != null)
                     {
-
                         //Figure out the base type for the target collection
                         Type[] GenericArguments = thisProperty.PropertyType.GetGenericArguments();
 
@@ -573,8 +568,6 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                         //Now we have the collection base type
                         Type listType = GenericArguments[0];
 
-
-
                         //Turn out input json collection into a list
                         IList tempCollection = sourceEnumerable.ToList();
 
@@ -584,10 +577,10 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                         //Grab the collection thats on the object we already have, since it might already have DB instances so we dont have to search
 
                         //Create a dictionary to hold these existing instances to avoid lookup overhead
-                        Dictionary<int, KeyedObject> ExistingDictionary = new Dictionary<int, KeyedObject>();
+                        Dictionary<int, KeyedObject> ExistingDictionary = new();
 
                         //If we managed to grab the existing object enumerable
-                        if (!!(thisProperty.GetValue(toSave) is IEnumerable existingCollection))
+                        if (thisProperty.GetValue(toSave) is IEnumerable existingCollection)
                         {
                             //Loop through it
                             foreach (KeyedObject ko in existingCollection)
@@ -605,7 +598,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
                         if (listType.IsSubclassOf(typeof(Entity)))
                         {
-                            this.UpdateEntityList(tempCollection!);
+                            UpdateEntityList(tempCollection!);
 
                             foreach (object o in tempCollection)
                             {
@@ -616,7 +609,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                         else if (listType.IsSubclassOf(typeof(KeyedObject)))
                         {
                             //Grab an instance of the repository we need now, instead of on every iteration
-                            IKeyedObjectRepository repository = this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(listType);
+                            IKeyedObjectRepository repository = ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(listType);
 
                             //Now loop through the temporary object list from the source json
                             for (int i = 0; i < tempCollection.Count; i++)
@@ -625,7 +618,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                                 KeyedObject toPopulate = (KeyedObject)tempCollection[i];
 
                                 //Set up to grab any existing instance
-                                KeyedObject existingObject = null;
+                                KeyedObject? existingObject = null;
 
                                 //If the new json claims the object already exists
                                 if (toPopulate._Id != 0)
@@ -636,13 +629,13 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                                 }
 
                                 //We're going to call further down the stack to get an instance attached to the DB and containing all the new values
-                                KeyedObject updatedObject = this.UpdateJsonObject(sourceArray[i].ToString(), (KeyedObject)tempCollection[i], cache, listType, repository, existingObject);
+                                KeyedObject updatedObject = UpdateJsonObject(sourceArray[i].ToString(), (KeyedObject)tempCollection[i], cache, listType, repository, existingObject);
 
                                 //Add that proper instance to the list we're using as our new collection value
                                 _ = newCollection.Add(updatedObject);
                             }
 
-                            if (!(repository is null))
+                            if (repository is not null)
                             {
                                 //Now loop through any of the values that werent found in the new list and remove them from the repository.
                                 //Keyed objects are only referenced by one owner so once removed, they have no use.
@@ -663,13 +656,13 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 {
                     Entity newValue = jObject.Remove<Entity>(thisProperty);
 
-                    if (!(newValue is null))
+                    if (newValue is not null)
                     {
                         Entity cachedEntity = cache.GetObject(newValue);
 
                         if (cachedEntity is null)
                         {
-                            newValue = this.RetrieveSavedEntity(newValue);
+                            newValue = RetrieveSavedEntity(newValue);
                             cache.AddObject(newValue);
                         }
                         else
@@ -689,14 +682,14 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
                     //Dont fuck with this property if it wasn't sent over by the client!
                     //Missing string, dont touch.
-                    if (!(jProp is null))
+                    if (jProp is not null)
                     {
                         //EMPTY string is manually set to null
                         if (string.IsNullOrWhiteSpace(jProp))
                         {
-                            if (!!(thisProperty.GetValue(toSave) is KeyedObject existing))
+                            if (thisProperty.GetValue(toSave) is KeyedObject existing)
                             {
-                                IKeyedObjectRepository repository = this.ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(thisProperty.PropertyType);
+                                IKeyedObjectRepository repository = ServiceProvider.GetRepositoryForType<IKeyedObjectRepository>(thisProperty.PropertyType);
 
                                 repository.Delete(existing);
 
@@ -709,15 +702,15 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                             //Check for existing prop value
 
                             //if existing val is null, try and create a new one so we have something to set
-                            if (!(thisProperty.GetValue(toSave) is KeyedObject val))
+                            if (thisProperty.GetValue(toSave) is not KeyedObject val)
                             {
                                 val = JsonConvert.DeserializeObject(jProp, thisProperty.PropertyType) as KeyedObject;
                             }
 
                             //If all that works out we're going to add it to the object
-                            if (!(val is null))
+                            if (val is not null)
                             {
-                                KeyedObject thisObject = this.UpdateJsonObject(jProp, val, cache, thisProperty.PropertyType);
+                                KeyedObject thisObject = UpdateJsonObject(jProp, val, cache, thisProperty.PropertyType);
 
                                 thisProperty.SetValue(toSave, thisObject);
                             }

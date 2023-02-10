@@ -10,7 +10,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Models
 
         public UpdateListPageModel()
         {
-            this.Guids = new List<string>();
+            Guids = new List<string>();
         }
     }
 }

@@ -6,7 +6,7 @@
 
         public DynamicViewResult(string viewPath)
         {
-            this.ViewPath = viewPath;
+            ViewPath = viewPath;
         }
     }
 }

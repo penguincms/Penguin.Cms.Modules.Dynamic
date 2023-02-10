@@ -3,7 +3,7 @@
 namespace Penguin.Cms.Modules.Dynamic.Attributes
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class ForceDynamicAttribute : Attribute
+    public sealed class ForceDynamicAttribute : Attribute
     {
     }
 }

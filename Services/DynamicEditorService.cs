@@ -27,7 +27,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
     /// </summary>
     public class DynamicEditorService : ISelfRegistering
     {
-        private static readonly ConcurrentDictionary<string, string?> Views = new ConcurrentDictionary<string, string?>();
+        private static readonly ConcurrentDictionary<string, string?> Views = new();
 
         /// <summary>
         /// The provider used for finding files
@@ -40,7 +40,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
         /// <param name="fileProvider">The provider used for finding files</param>
         public DynamicEditorService(IFileProvider fileProvider)
         {
-            this.FileProvider = fileProvider;
+            FileProvider = fileProvider;
         }
 
         /// <summary>
@@ -59,14 +59,9 @@ namespace Penguin.Cms.Modules.Dynamic.Services
 
             foreach (KeyValuePair<string, object> attribute in Attributes)
             {
-                if (attribute.Value is null)
-                {
-                    attributeString = $" data-{attribute.Key}{attributeString}";
-                }
-                else
-                {
-                    attributeString = $" data-{attribute.Key}=\"{attribute.Value}\"{attributeString}";
-                }
+                attributeString = attribute.Value is null
+                    ? $" data-{attribute.Key}{attributeString}"
+                    : $" data-{attribute.Key}=\"{attribute.Value}\"{attributeString}";
             }
 
             return new HtmlString(attributeString);
@@ -81,18 +76,12 @@ namespace Penguin.Cms.Modules.Dynamic.Services
         /// <returns>A result object that may point to either an action or a view to be used when rendering the object</returns>
         public EditorHandlerResult FindHandler(IMetaObject metaObject, DisplayContexts requestContext, IMetaType? displayType = null)
         {
-            if (metaObject is null)
-            {
-                throw new ArgumentNullException(nameof(metaObject));
-            }
-
-            if (metaObject.Property?.HasAttribute<ForceDynamicAttribute>() ?? false)
-            {
-                return new DynamicEditorResult();
-            }
-
-            return GetAction(metaObject, requestContext, displayType) ??
-                   this.GetView(metaObject, requestContext, displayType) ??
+            return metaObject is null
+                ? throw new ArgumentNullException(nameof(metaObject))
+                : metaObject.Property?.HasAttribute<ForceDynamicAttribute>() ?? false
+                ? new DynamicEditorResult()
+                : GetAction(metaObject, requestContext, displayType) ??
+                   GetView(metaObject, requestContext, displayType) ??
                    (metaObject.GetCoreType() == CoreType.Value ?
                                                 new StaticValueResult() :
                                                 new DynamicEditorResult() as EditorHandlerResult);
@@ -122,7 +111,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
 
                 if (methodInfo.GetCustomAttribute<DynamicHandlerAttribute>() is DynamicHandlerAttribute attribute && attribute.DisplayContexts.HasFlag(requestContext))
                 {
-                    if (attribute.ToHandle.FirstOrDefault(t => displayType.Is(t)) is Type handledType)
+                    if (attribute.ToHandle.FirstOrDefault(displayType.Is) is Type handledType)
                     {
                         return GetActionResult(methodInfo);
                     }
@@ -136,12 +125,9 @@ namespace Penguin.Cms.Modules.Dynamic.Services
                                            ?.Select(a => a.Instance)
                                            ?.SingleOrDefault();
 
-            if (customRouteAttribute != null)
-            {
-                return new DynamicActionResult(customRouteAttribute[nameof(CustomRouteAttribute.RouteValues)].ToDictionary<string, object>());
-            }
-
-            return null;
+            return customRouteAttribute != null
+                ? new DynamicActionResult(customRouteAttribute[nameof(CustomRouteAttribute.RouteValues)].ToDictionary<string, object>())
+                : null;
         }
 
         /// <summary>
@@ -172,7 +158,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
 
             if (!Views.TryGetValue(Key, out string? path))
             {
-                DynamicRenderer renderer = new DynamicRenderer(new DynamicRendererSettings(displayType, property, this.FileProvider)
+                DynamicRenderer renderer = new(new DynamicRendererSettings(displayType, property, FileProvider)
                 {
                     BasePath = BasePath
                 });
@@ -188,14 +174,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                return null;
-            }
-            else
-            {
-                return new DynamicViewResult(path);
-            }
+            return string.IsNullOrWhiteSpace(path) ? null : new DynamicViewResult(path);
         }
 
         private static DynamicActionResult GetActionResult(MethodInfo methodInfo)
@@ -205,8 +184,8 @@ namespace Penguin.Cms.Modules.Dynamic.Services
                 throw new ArgumentNullException(nameof(methodInfo));
             }
 
-            Dictionary<string, object> routeData = new Dictionary<string, object>
-                        {
+            Dictionary<string, object> routeData = new()
+            {
                             { "controller", methodInfo.ReflectedType.Name.Replace("Controller", "") },
                             { "action", methodInfo.Name }
                         };

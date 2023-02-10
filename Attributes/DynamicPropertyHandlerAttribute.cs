@@ -8,7 +8,7 @@ namespace Penguin.Cms.Modules.Dynamic.Attributes
     /// to render the object in the provided display context
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class DynamicPropertyHandlerAttribute : Attribute
+    public sealed class DynamicPropertyHandlerAttribute : Attribute
     {
         /// <summary>
         /// The display context the action is used in
@@ -18,12 +18,12 @@ namespace Penguin.Cms.Modules.Dynamic.Attributes
         /// <summary>
         /// The name of the property of the meta object that this action is an editor for
         /// </summary>
-        public string PropertyName { get; set; }
+        public string PropertyName { get; internal set; }
 
         /// <summary>
         /// The target object type handled by this action
         /// </summary>
-        public Type Type { get; set; }
+        public Type Type { get; internal set; }
 
         /// <summary>
         /// Creates a new instance of this attribute
@@ -33,9 +33,11 @@ namespace Penguin.Cms.Modules.Dynamic.Attributes
         /// <param name="propertyName">The target object type handled by this action</param>
         public DynamicPropertyHandlerAttribute(DisplayContexts context, Type type, string propertyName)
         {
-            this.DisplayContexts = context;
-            this.Type = type;
-            this.PropertyName = propertyName;
+            DisplayContexts = context;
+            Type = type;
+            PropertyName = propertyName;
         }
+
+        public DisplayContexts Context { get; }
     }
 }

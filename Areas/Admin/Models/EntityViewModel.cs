@@ -11,9 +11,9 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Models
 
         public EntityViewModel(T target, ICollection<ViewModule>? modules = null)
         {
-            this.Modules = modules ?? new List<ViewModule>();
+            Modules = modules ?? new List<ViewModule>();
 
-            this.Target = target;
+            Target = target;
         }
     }
 }

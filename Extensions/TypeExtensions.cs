@@ -7,38 +7,16 @@ namespace Penguin.Cms.Modules.Dynamic.Extensions
     {
         private const string DYNAMIC_PROXIES_NS = "System.Data.Entity.DynamicProxies";
 
-        public static string GetUnproxifiedName(this Type t)
+        public static string? GetUnproxifiedName(this Type t)
         {
-            if (t is null)
-            {
-                throw new ArgumentNullException(nameof(t));
-            }
-
-            if (t.Namespace == DYNAMIC_PROXIES_NS)
-            {
-                return t.BaseType!.FullName!;
-            }
-            else
-            {
-                return t.FullName!;
-            }
+            return t is null
+                ? throw new ArgumentNullException(nameof(t))
+                : t.Namespace == DYNAMIC_PROXIES_NS ? t.BaseType!.FullName : t.FullName;
         }
 
         public static string GetUnproxifiedName(this IMetaType t)
         {
-            if (t is null)
-            {
-                throw new ArgumentNullException(nameof(t));
-            }
-
-            if (t.Namespace == DYNAMIC_PROXIES_NS)
-            {
-                return t.BaseType.FullName;
-            }
-            else
-            {
-                return t.FullName;
-            }
+            return t is null ? throw new ArgumentNullException(nameof(t)) : t.Namespace == DYNAMIC_PROXIES_NS ? t.BaseType.FullName : t.FullName;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Penguin.Cms.Modules.Dynamic.Controllers
     {
         public ActionResult AsCSV(IMetaObject model)
         {
-            return this.View(model);
+            return View(model);
         }
     }
 }

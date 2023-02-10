@@ -17,7 +17,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Models
                 throw new System.ArgumentNullException(nameof(Objects));
             }
 
-            DynamicListRenderPageModel model = new DynamicListRenderPageModel()
+            DynamicListRenderPageModel model = new()
             {
                 PagedList = new PagedListContainer<IMetaObject>()
                 {
