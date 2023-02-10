@@ -231,8 +231,8 @@ namespace Penguin.Cms.Modules.Dynamic.Services
 
                 return new MetaType()
                 {
-                    Namespace = displayTypeName.Contains(".") ? displayTypeName.ToLast(".") : "",
-                    Name = displayTypeName.Contains(".") ? displayTypeName.FromLast(".") : displayTypeName,
+                    Namespace = displayTypeName.Contains('.') ? displayTypeName.ToLast(".") : "",
+                    Name = displayTypeName.Contains('.') ? displayTypeName.FromLast(".") : displayTypeName,
                     AssemblyQualifiedName = displayTypeName,
                     FullName = displayTypeName
                 };
