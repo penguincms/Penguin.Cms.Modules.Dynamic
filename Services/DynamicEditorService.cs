@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Html;
+﻿using Loxifi;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Penguin.Cms.Abstractions.Attributes;
