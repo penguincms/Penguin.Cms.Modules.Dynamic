@@ -1,5 +1,5 @@
 ﻿@model DynamicListModel<IMetaObject>
-
+@using Loxifi;
 @if (Model.List.Any())
 {
     IEnumerable<IMetaProperty> properties = Model.List.ElementAt(0).Type.Properties;

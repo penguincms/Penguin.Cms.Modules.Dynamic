@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;
 using Penguin.Cms.Core.Extensions;
+using Loxifi;
 using Penguin.Cms.Core.Services;
 using Penguin.Cms.Entities;
 using Penguin.Cms.Modules.Admin.Areas.Admin.Controllers;
@@ -37,7 +38,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             //UserSession = userSession;
             //AuditEntryRepository = auditEntryRepository;
         }
-
+        private static TypeFactory TypeFactory { get; set; } = new TypeFactory(new TypeFactorySettings());
         public virtual ActionResult Edit(int? id, string? type = null)
         {
             System.Type t = type is null ? typeof(T) : TypeFactory.GetTypeByFullName(type);

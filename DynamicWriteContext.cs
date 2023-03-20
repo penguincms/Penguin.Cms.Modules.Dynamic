@@ -4,6 +4,7 @@ using Penguin.Persistence.Abstractions.Interfaces;
 using Penguin.Persistence.Repositories.Interfaces;
 using Penguin.Reflection;
 using System;
+using Loxifi;
 
 namespace Penguin.Cms.Modules.Dynamic
 {

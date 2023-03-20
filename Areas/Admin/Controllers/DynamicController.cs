@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Loxifi;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Newtonsoft.Json;
@@ -339,6 +340,21 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             }
         }
 
+        public Type GetType(object toGet)
+        {
+            if (toGet is null)
+            {
+                throw new ArgumentNullException(nameof(toGet));
+            }
+
+            var thisType = toGet.GetType();
+
+            if (thisType.Namespace == "System.Data.Entity.DynamicProxies")
+                return thisType.BaseType;
+
+            return thisType;
+        }
+        
         /// <summary>
         /// Updates the provided entity using a json string, and saves it to the registered persistence context
         /// </summary>
@@ -347,7 +363,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
         /// <param name="t">An optional type override to use when finding the correct context</param>
         public void SaveJsonObject(string json, Entity toSave, DynamicSaveCache cache, Type? t = null)
         {
-            t ??= TypeFactory.GetType(toSave);
+            t ??= GetType(toSave);
 
             if (ServiceProvider.GetRepositoryForType(t) is IRepository typeRepository)
             {
