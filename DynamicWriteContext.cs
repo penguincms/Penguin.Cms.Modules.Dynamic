@@ -20,7 +20,7 @@ namespace Penguin.Cms.Modules.Dynamic
 
         public DynamicWriteContext(string TypeString, int Id, IServiceProvider serviceProvider)
         {
-            Type t = TypeFactory.GetTypeByFullName(TypeString, typeof(Entity));
+            Type t = TypeFactory.Default.GetTypeByFullName(TypeString, typeof(Entity));
 
             TypeRepository = serviceProvider.GetRepositoryForType<IKeyedObjectRepository>(t);
 

@@ -97,7 +97,7 @@ namespace Penguin.Cms.Modules.Dynamic.Services
 
             displayType ??= metaObject.Type;
 
-            foreach (MethodInfo methodInfo in TypeFactory.GetDerivedTypes(typeof(Controller)).SelectMany(m => m.GetMethods()))
+            foreach (MethodInfo methodInfo in TypeFactory.Default.GetDerivedTypes(typeof(Controller)).SelectMany(m => m.GetMethods()))
             {
                 if (!metaObject.IsRoot())
                 {

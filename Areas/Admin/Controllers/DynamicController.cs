@@ -77,7 +77,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 throw new ArgumentNullException(nameof(model));
             }
 
-            Type type = TypeFactory.GetTypeByFullName(model.Type, typeof(Entity), false);
+            Type type = TypeFactory.Default.GetTypeByFullName(model.Type, typeof(Entity), false);
 
             string Message = string.Empty;
             List<string> Existing = new();
@@ -222,7 +222,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             //DynamicContext thisContext = ServiceProvider.GetService<DynamicContext>();
 
             //Grabbing all the possible DBSetTypes. This should be an accurate list of all repository types
-            List<Type> EntityTypes = TypeFactory.GetDerivedTypes(typeof(Entity)).ToList();
+            List<Type> EntityTypes = TypeFactory.Default.GetDerivedTypes(typeof(Entity)).ToList();
 
             int LastFindCount = ToFind.Count;
 

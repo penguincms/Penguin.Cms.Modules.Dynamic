@@ -38,10 +38,9 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
             //UserSession = userSession;
             //AuditEntryRepository = auditEntryRepository;
         }
-        private static TypeFactory TypeFactory { get; set; } = new TypeFactory(new TypeFactorySettings());
         public virtual ActionResult Edit(int? id, string? type = null)
         {
-            System.Type t = type is null ? typeof(T) : TypeFactory.GetTypeByFullName(type);
+            System.Type t = type is null ? typeof(T) : TypeFactory.Default.GetTypeByFullName(type);
 
             object? toEdit = id.HasValue
                 ? t.IsSubclassOf(typeof(KeyedObject))
@@ -55,7 +54,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
         public virtual ActionResult List(string type, int count = 20, int page = 0, string text = "")
         {
-            System.Type listType = type is null ? typeof(T) : TypeFactory.GetTypeByFullName(type, typeof(object), false);
+            System.Type listType = type is null ? typeof(T) : TypeFactory.Default.GetTypeByFullName(type, typeof(object), false);
 
             MetaConstructor c = Constructor;
 
@@ -90,7 +89,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
                 return null;
             }
 
-            Type lt = TypeFactory.GetTypeByFullName(temporaryEntity.TypeName, typeof(Entity));
+            Type lt = TypeFactory.Default.GetTypeByFullName(temporaryEntity.TypeName, typeof(Entity));
 
             IEntityRepository ltTypeRepository = (IEntityRepository)ServiceProvider.GetService(typeof(IEntityRepository<>).MakeGenericType(lt));
 
@@ -106,7 +105,7 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
                 if (existingValue == null) //No guid hit? Maybe its a child type?
                 {
-                    IEnumerable<Type> toSearch = TypeFactory.GetDerivedTypes(lt);
+                    IEnumerable<Type> toSearch = TypeFactory.Default.GetDerivedTypes(lt);
 
                     foreach (Type t in toSearch)
                     {
@@ -130,9 +129,9 @@ namespace Penguin.Cms.Modules.Dynamic.Areas.Admin.Controllers
 
         public ActionResult Search(string type, string term, int limit = 10)
         {
-            List<Type> typesToSearch = TypeFactory.GetDerivedTypes(TypeFactory.GetTypeByFullName(type)).ToList();
+            List<Type> typesToSearch = TypeFactory.Default.GetDerivedTypes(TypeFactory.Default.GetTypeByFullName(type)).ToList();
 
-            typesToSearch.Add(TypeFactory.GetTypeByFullName(type));
+            typesToSearch.Add(TypeFactory.Default.GetTypeByFullName(type));
 
             typesToSearch = typesToSearch.Distinct().ToList();
 

@@ -12,7 +12,7 @@
     string RootNode = this.Context.Request.Query["Root"];
     string RootParam = RootNode != null ? "Root=" + RootNode : string.Empty;
 
-    TreeNode<Type> TypeTree = TypeFactory.GetAllTypes().Where(t =>
+    TreeNode<Type> TypeTree = TypeFactory.Default.GetAllTypes(true).Where(t =>
     {
         EntityAttribute e = t.GetCustomAttribute<EntityAttribute>();
 
